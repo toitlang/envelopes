@@ -165,7 +165,8 @@ jobs:
         run: |
           mkdir envelopes
           for variant in $VARIANTS; do
-            cp build/$variant/firmware.envelope envelopes/$variant.envelope
+            cp build/$variant/firmware.envelope envelopes/firmware-$variant.envelope
+            gzip -9 envelopes/firmware-$variant.envelope
           done
 
       - name: Upload artifacts
