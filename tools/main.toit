@@ -6,6 +6,7 @@ import cli
 import host.file
 import host.directory
 import writer show Writer
+import .gist as gist
 import .git
 import .utils
 
@@ -70,6 +71,22 @@ main args:
       --run=:: variant_synthesize it --ui=ui
   root_cmd.add variant_synthesize_cmd
 
+  download_gist_cmd := cli.Command "download-gist"
+      --long_help="Download all files of the given gist URL."
+      --options=[
+        cli.Option "output"
+            --short_name="o"
+            --short_help="The output directory to download the gist to."
+            --required,
+      ]
+      --rest=[
+          cli.Option "gist-url"
+              --short_help="The URL of the gist to download."
+              --required,
+      ]
+      --run=:: download_gist it --ui=ui
+  root_cmd.add download_gist_cmd
+
   root_cmd.run args --ui=ui
 
 variant_list parsed/cli.Parsed --ui/cli.Ui:
@@ -90,6 +107,11 @@ variant_list --root/string --ui/cli.Ui -> List:
     result.add variant
   variant_stream.close
   return result
+
+download_gist parsed/cli.Parsed --ui/cli.Ui:
+  output := parsed["output"]
+  gist_url := parsed["gist-url"]
+  gist.download --output=output --gist_url=gist_url --ui=ui
 
 variant_synthesize parsed/cli.Parsed --ui/cli.Ui:
   toit_root := parsed["toit-root"]

@@ -16,6 +16,10 @@ on:
         description: Variant to build
         required: false
         type: string
+      gist:
+        description: Link to gist with variant files
+        required: false
+        type: string
 
 jobs:
   build:
@@ -107,16 +111,30 @@ jobs:
         run: |
           VARIANTS=${{ github.event.inputs.variant }}
           if [ -z "$VARIANTS" ]; then
-            VARIANTS=$(build/envelope-tool list)
-            if [ $? -ne 0 ]; then
-              echo "Failed to list variants"
-              exit 1
+            if [ -z "${{ github.event.inputs.gist }}" ]; then
+              VARIANTS="gist"
+            else
+              VARIANTS=$(build/envelope-tool list)
+              if [ $? -ne 0 ]; then
+                echo "Failed to list variants"
+                exit 1
+              fi
             fi
           fi
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "VARIANTS<<$EOF" >> $GITHUB_ENV
           echo "$VARIANTS" >> $GITHUB_ENV
           echo "$EOF" >> $GITHUB_ENV
+          echo "VARIANTS_ROOT=variants" >> $GITHUB_ENV
+
+      - name: Download Gist
+        if: ${{ github.event.inputs.gist }}
+        run: |
+          GIST=${{ github.event.inputs.gist }}
+          mkdir -p "gist-variant/$VARIANTS"
+          build/envelope-tool download-gist -o "gist-variant/$VARIANTS" "$GIST"
+          echo "VARIANTS_ROOT=gist-variant" >> $GITHUB_ENV
+          find gist-variant
 
       - name: Synthesize the variants
         run: |
@@ -124,7 +142,7 @@ jobs:
             --toit-root=toit \
             --output-root=synthesized \
             --sdk-path=build/host/sdk \
-            --variants-root=variants \
+            --variants-root=$VARIANTS_ROOT \
             --build-root=build \
             $VARIANTS
 
