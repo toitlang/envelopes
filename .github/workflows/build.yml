@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       upload-release:
-        description: Whether to upload release artifacts
+        description: Upload release artifacts
         required: true
         type: boolean
         default: false

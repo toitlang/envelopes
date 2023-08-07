@@ -27,7 +27,7 @@ main args:
   root_cmd := cli.Command "root"
 
   variant_list_cmd := cli.Command "list"
-      --short_help="Lists all variants."
+      --short_help="List all variants."
       --rest=[
         cli.Option "root"
             --short_help="The root directory to list variants from."
@@ -38,7 +38,7 @@ main args:
 
   variant_synthesize_cmd := cli.Command "synthesize"
       --long_help="""
-        Synthesizes the given variants.
+        Synthesize the given variants.
 
         Generates a project that can be compiled for each variant.
 
