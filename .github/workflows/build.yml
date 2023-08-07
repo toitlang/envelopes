@@ -80,11 +80,6 @@ jobs:
         run: |
           make TOIT_VERSION=${{ github.event.inputs.toit-version }} download-toit
 
-      - name: Patch Toit
-        run: |
-          # Temporary patch until upstream is fixed.
-          (cd toit && patch -p1 < ../patches/toit.patch)
-
       - name: Build the host SDK
         env:
           IDF_CCACHE_ENABLE: 1
