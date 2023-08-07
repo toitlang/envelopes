@@ -72,7 +72,7 @@ main args:
   root_cmd.add variant_synthesize_cmd
 
   download_gist_cmd := cli.Command "download-gist"
-      --long_help="Downloads all files of the given gist URL."
+      --long_help="Download all files of the given gist URL."
       --options=[
         cli.Option "output"
             --short_name="o"
