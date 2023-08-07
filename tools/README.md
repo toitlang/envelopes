@@ -5,6 +5,7 @@ different configurations (like `sdkconfig`).
 We call these configurations "variants".
 
 ## Toit Host SDK
+
 The envelopes and the envelope tool need the Toit SDK to be available.
 
 The easiest way to get it is by running
