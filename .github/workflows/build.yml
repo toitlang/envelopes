@@ -2,6 +2,20 @@ name: Build
 
 on:
   workflow_dispatch:
+    inputs:
+      toit-version:
+        description: Toit SDK version to check out
+        required: true
+        type: string
+      upload-release:
+        description: Upload release artifacts
+        required: true
+        type: boolean
+        default: false
+      variant:
+        description: Variant to build
+        required: false
+        type: string
 
 jobs:
   build:
@@ -9,3 +23,150 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      # Use Go 1.20
+      - name: Switch to Go 1.20
+        shell: bash
+        run:
+          echo "$GOROOT_1_20_X64"/bin >> $GITHUB_PATH
+
+      # Get values for cache paths to be used in later steps
+      - name: Get Go paths
+        id: go-cache-paths
+        shell: bash
+        run: |
+          echo "go-build=$(go env GOCACHE)" >> $GITHUB_OUTPUT
+          echo "go-mod=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
+
+      # Cache go build cache, used to speedup go test
+      - name: Go Build Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.go-cache-paths.outputs.go-build }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-build-
+
+      # Cache go mod cache, used to speedup builds
+      - name: Go Mod Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.go-cache-paths.outputs.go-mod }}
+          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-mod-
+
+      - name: Ccache cache
+        uses: actions/cache@v3
+        # Store and retrieve the cache with the given sha.
+        # The 'restore-keys' prefix finds the most recent cache in case there
+        # is no match (which should almost always be the case).
+        with:
+          path: ${{ github.workspace }}/.ccache
+          key: envelope-ccache-${{ github.sha }}
+          restore-keys: envelope-ccache-
+
+      - name: Install dependencies - Linux
+        run: |
+          sudo apt-get update
+          sudo apt-get install ninja-build ccache
+          ninja --version
+          cmake --version
+          gcc --version
+
+      - name: Fetch the Toit repository
+        run: |
+          make TOIT_VERSION=${{ github.event.inputs.toit-version }} download-toit
+
+      - name: Patch Toit
+        run: |
+          # Temporary patch until upstream is fixed.
+          (cd toit && patch -p1 < ../patches/toit.patch)
+
+      - name: Build the host SDK
+        env:
+          IDF_CCACHE_ENABLE: 1
+          CCACHE_DIR: ${{ github.workspace }}/.ccache
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_COMPRESS: true
+          CCACHE_COMPRESSLEVEL: '6'
+          CCACHE_MAXSIZE: 400M
+        run: |
+          ccache -s
+          make build-host
+          ccache -s
+
+      - name: Build the envelope tool
+        run: |
+          build/host/sdk/bin/toit.pkg install --project-root=tools
+          build/host/sdk/bin/toit.compile -o build/envelope-tool tools/main.toit
+
+      - name: Install ESP32 tools
+        run: |
+          toit/third_party/esp-idf/install.sh
+
+      - name: Setting the variants
+        run: |
+          VARIANTS=${{ github.event.inputs.variant }}
+          if [ -z "$VARIANTS" ]; then
+            VARIANTS=$(build/envelope-tool list)
+            if [ $? -ne 0 ]; then
+              echo "Failed to list variants"
+              exit 1
+            fi
+          fi
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "VARIANTS<<$EOF" >> $GITHUB_ENV
+          echo "$VARIANTS" >> $GITHUB_ENV
+          echo "$EOF" >> $GITHUB_ENV
+
+      - name: Synthesize the variants
+        run: |
+          build/envelope-tool synthesize \
+            --toit-root=toit \
+            --output-root=synthesized \
+            --sdk-path=build/host/sdk \
+            --variants-root=variants \
+            --build-root=build \
+            $VARIANTS
+
+      - name: Build the variants
+        env:
+          IDF_CCACHE_ENABLE: 1
+          CCACHE_DIR: ${{ github.workspace }}/.ccache
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_COMPRESS: true
+          CCACHE_COMPRESSLEVEL: '6'
+          CCACHE_MAXSIZE: 400M
+        run: |
+          ccache -s
+          for variant in $VARIANTS; do
+            (cd synthesized/$variant && make)
+          done
+          ccache -s
+
+      - name: Prepare envelopes for upload
+        run: |
+          mkdir envelopes
+          for variant in $VARIANTS; do
+            cp build/$variant/firmware.envelope envelopes/firmware-$variant.envelope
+            gzip -9 envelopes/firmware-$variant.envelope
+          done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: |
+            envelopes
+
+      - name: Release
+        if: ${{ github.event.inputs.upload-release }}
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            envelopes/*
+          body: |
+            Envelopes for Toit SDK ${{ github.event.inputs.toit-version }}
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.event.inputs.toit-version }}
+          commit: main
