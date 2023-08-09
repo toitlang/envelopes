@@ -5,6 +5,7 @@
 import cli
 import host.file
 import host.directory
+import host.pipe
 import writer show Writer
 import .gist as gist
 import .git
@@ -162,15 +163,37 @@ variant_synthesize
       --chip=chip
       --ui=ui
 
+apply_directory_patch_ --patch_path/string --directory/string --strip/int=1:
+  patch := file.read_content patch_path
+  args := ["patch", "-d", directory]
+  if strip > 0:
+    args.add "-p$strip"
+  stream := pipe.to args
+  writer := Writer stream
+  writer.write patch
+  writer.close
+
+apply_file_patch_ --patch_path/string --file_path/string:
+  patch := file.read_content patch_path
+  args := ["patch", file_path]
+  stream := pipe.to args
+  writer := Writer stream
+  writer.write patch
+  writer.close
+
 ensure_main_ dir/string --toit_root/string --chip/string:
   if file.is_directory "$dir/main": return
   main_path := toit_main_path_for_ --chip=chip
   copy_directory --from="$toit_root/$main_path" --to="$dir/main"
+  if file.is_file "$dir/main.patch":
+    apply_directory_patch_ --patch_path="$dir/main.patch" --directory=dir
 
 ensure_partitions_ dir/string --toit_root/string --chip/string:
   if file.is_file "$dir/partitions.csv": return
   partition_path := toit_partition_path_for_ --chip=chip
   copy_file --from="$toit_root/$partition_path" --to="$dir/partitions.csv"
+  if file.is_file "$dir/partitions.csv.patch":
+    apply_file_patch_ --patch_path="$dir/partitions.csv.patch" --file_path="$dir/partitions.csv"
 
 ensure_sdkconfig_ dir/string --toit_root/string --chip/string:
   if file.is_file "$dir/sdkconfig" or file.is_file "$dir/sdkconfig.defaults": return
@@ -180,8 +203,12 @@ ensure_sdkconfig_ dir/string --toit_root/string --chip/string:
 
   if file.is_file "$toit_root/$sdk_config_path":
     copy_file --from="$toit_root/$sdk_config_path" --to="$dir/sdkconfig"
+    if file.is_file "$dir/sdkconfig.patch":
+      apply_file_patch_ --patch_path="$dir/sdkconfig.patch" --file_path="$dir/sdkconfig"
   if file.is_file "$toit_root/$sdk_config_defaults_path":
     copy_file --from="$toit_root/$sdk_config_defaults_path" --to="$dir/sdkconfig.defaults"
+    if file.is_file "$dir/sdkconfig.defaults.patch":
+      apply_file_patch_ --patch_path="$dir/sdkconfig.defaults.patch" --file_path="$dir/sdkconfig.defaults"
 
 create_cmakelists_ dir/string --toit_root/string --sdk_path/string --chip/string --ui/cli.Ui:
   if file.is_file "$dir/CMakeLists.txt":
