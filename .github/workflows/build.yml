@@ -152,7 +152,8 @@ jobs:
         run: |
           ccache -s
           for variant in $VARIANTS; do
-            (cd synthesized/$variant && make)
+            mkdir -p build/$variant
+            (cd synthesized/$variant && make) || touch build/$variant/failed
           done
           ccache -s
 
@@ -160,6 +161,10 @@ jobs:
         run: |
           mkdir envelopes
           for variant in $VARIANTS; do
+            if [ -e build/$variant/failed ]; then
+              echo "Skipping $variant"
+              continue
+            fi
             cp build/$variant/firmware.envelope envelopes/firmware-$variant.envelope
             gzip -9 envelopes/firmware-$variant.envelope
           done
@@ -183,3 +188,17 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.event.inputs.toit-version }}
           commit: main
+
+      - name: Report failed builds
+        if: ${{ github.event.inputs.upload-release }}
+        run: |
+          build_failed=false
+          for variant in $VARIANTS; do
+            if [ -e build/$variant/failed ]; then
+              echo "Build of $variant failed"
+              build_failed=true
+            fi
+          done
+          if [ "$build_failed" = true ]; then
+            exit 1
+          fi
