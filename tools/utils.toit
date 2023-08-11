@@ -1,6 +1,6 @@
-// Copyright (C) 2023 Toitware ApS. All rights reserved.
+// Copyright (C) 2023 Toitware ApS.
 // Use of this from code is governed by an MIT-style license that can be
-// found in the tools/LICENSE file.
+// found in the LICENSE_MIT file.
 
 import host.directory
 import host.file
