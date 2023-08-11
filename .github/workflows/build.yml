@@ -177,7 +177,7 @@ jobs:
             envelopes
 
       - name: Release
-        if: ${{ github.event.inputs.upload-release }}
+        if: ${{ github.event.inputs.upload-release == 'true' }}
         uses: ncipollo/release-action@v1
         with:
           artifacts: |
@@ -190,7 +190,7 @@ jobs:
           commit: main
 
       - name: Report failed builds
-        if: ${{ github.event.inputs.upload-release }}
+        if: ${{ github.event.inputs.upload-release == 'true' }}
         run: |
           build_failed=false
           for variant in $VARIANTS; do
