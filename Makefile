@@ -1,7 +1,7 @@
 # Copyright (C) 2023 Toitware ApS.
 #
-# Use of this source code is governed by an MIT-style license that can be
-# found in the tools/LICENSE file.
+# Use of this source code is governed by a BSD0-style license that can be
+# found in the LICENSE_BSD0 file.
 
 SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
