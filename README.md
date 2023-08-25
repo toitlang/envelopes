@@ -19,15 +19,6 @@ compiled with and for SDK v2.0.0-alpha.90 are found on the
 [v2.0.0-alpha.90 release](https://github.com/toitlang/envelopes/releases/tag/v2.0.0-alpha.90)
 page.
 
-## Contributing
-
-Feel free to open issues and pull requests with new variants. Make sure
-they have a description (README.md) with the purpose and the changes.
-We will automatically build them whenever a new Toit version is released.
-
-Note that some variants are featured here. Consult the
-Toit team before adding new variants to this README.
-
 ## Variants
 
 ### esp32
@@ -66,3 +57,45 @@ A [variant](variants/esp32s3-spiram-octo/) for ESP32-S3 boards with external
 octal PSRAM.
 
 These boards are faster, but often more expensive.
+
+## Contributing
+
+Feel free to open issues and pull requests with new variants. Make sure
+they have a description (README.md) with the purpose and the changes.
+We will automatically build them whenever a new Toit version is released.
+
+Note that some variants are featured here. Consult the
+Toit team before adding new variants to this README.
+
+### Creating a variant
+
+Variants are created by copying an existing variant and making the
+necessary changes. These consists of either overwriting existing files
+or by applying patches.
+
+#### Partition changes
+
+For partition changes, simply copy the new `partitions.csv` into the
+variant directory. The `esp32-ota-1c0000` is an example of this where
+the OTA partition size has been increased.
+
+#### sdkconfig changes
+
+For `sdkconfig` changes, a patch to the original `sdkconfig.defaults`
+file is typically preferred.
+
+For example, to create a variant `esp32s3-foo`.
+* Check out Toit (or use an existing checkout).
+* Copy the existing `toolchains/esp32s3` directory to `toolchains/esp32s3-foo`:
+  `cp -r toolchains/esp32s3 toolchains/esp32s3-foo`.
+* Run `make IDF_TARGET=esp32s3 ESP32_CHIP=esp32s3-foo menuconfig` and make the changes you want.
+  This automatically updates the `sdkconfig.defaults` as well.
+* Create patch by running `diff -u toolchains/esp32s3/sdkconfig.defaults toolchains/esp32s3-foo/sdkconfig.defaults > toolchains/esp32s3-foo/sdkconfig.defaults.patch`.
+* Create a new variant in this (`envelopes`) repository and copy the patch file into it.
+
+#### Main changes
+
+For changes to the `main` directory (be it the `toit.c` or the `CMakelists.txt` in it),
+use a recursive diff to create a patch on the original `main` directory.
+
+The synthetization tool will use the flag `-p1` when applying the patch.
