@@ -198,17 +198,17 @@ ensure_partitions_ dir/string --toit_root/string --chip/string:
 ensure_sdkconfig_ dir/string --toit_root/string --chip/string:
   if file.is_file "$dir/sdkconfig" or file.is_file "$dir/sdkconfig.defaults": return
 
-  sdk_config_path := toit_sdk_config_path_for_ --chip=chip
+  if file.is_file "$dir/sdkconfig.patch":
+    throw "Variants should only patch sdkconfig.defaults, not sdkconfig."
+
   sdk_config_defaults_path := toit_sdk_config_defaults_path_for_ --chip=chip
 
-  if file.is_file "$toit_root/$sdk_config_path":
-    copy_file --from="$toit_root/$sdk_config_path" --to="$dir/sdkconfig"
-    if file.is_file "$dir/sdkconfig.patch":
-      apply_file_patch_ --patch_path="$dir/sdkconfig.patch" --file_path="$dir/sdkconfig"
   if file.is_file "$toit_root/$sdk_config_defaults_path":
     copy_file --from="$toit_root/$sdk_config_defaults_path" --to="$dir/sdkconfig.defaults"
     if file.is_file "$dir/sdkconfig.defaults.patch":
       apply_file_patch_ --patch_path="$dir/sdkconfig.defaults.patch" --file_path="$dir/sdkconfig.defaults"
+  else:
+    throw "No sdkconfig.defaults found for chip '$chip'."
 
 create_cmakelists_ dir/string --toit_root/string --sdk_path/string --chip/string --ui/cli.Ui:
   if file.is_file "$dir/CMakeLists.txt":
