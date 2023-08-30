@@ -62,6 +62,8 @@ main args:
         cli.Option "variants-root"
             --short_help="The root directory of the variants."
             --required,
+        cli.Flag "ignore-errors"
+            --short_help="Ignore errors when synthesizing variants.",
       ]
       --rest=[
           cli.Option "variant"
@@ -121,14 +123,24 @@ variant_synthesize parsed/cli.Parsed --ui/cli.Ui:
   sdk_path := parsed["sdk-path"]
   variants_root := parsed["variants-root"]
   variants := parsed["variant"]
+  ignore_errors := parsed["ignore-errors"]
 
-  variants.do: variant_synthesize
-      --variant_path="$variants_root/$it"
-      --toit_root=toit_root
-      --output="$output_root/$it"
-      --build_path="$build_root/$it"
-      --sdk_path=sdk_path
-      --ui=ui
+  variants.do: | variant/string |
+    exception := catch:
+      variant_synthesize
+          --variant_path="$variants_root/$variant"
+          --toit_root=toit_root
+          --output="$output_root/$variant"
+          --build_path="$build_root/$variant"
+          --sdk_path=sdk_path
+          --ui=ui
+    if exception:
+      ui.print "Failed to synthesize variant '$variant': $exception."
+      if not ignore_errors: ui.abort
+      catch:
+        directory.mkdir --recursive "$output_root/$variant"
+        file.write-content --path="$output_root/$variant/failed" "$exception"
+
 
 variant_synthesize
     --variant_path/string

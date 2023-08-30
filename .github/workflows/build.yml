@@ -139,6 +139,7 @@ jobs:
       - name: Synthesize the variants
         run: |
           build/envelope-tool synthesize \
+            --ignore-errors \
             --toit-root=toit \
             --output-root=synthesized \
             --sdk-path=build/host/sdk \
@@ -158,6 +159,11 @@ jobs:
           ccache -s
           for variant in $VARIANTS; do
             mkdir -p build/$variant
+            if [ -e synthesized/$variant/failed ]; then
+              echo "Skipping $variant to due failed synthesis."
+              touch build/$variant/failed
+              continue
+            fi
             (cd synthesized/$variant && make) || touch build/$variant/failed
           done
           ccache -s
