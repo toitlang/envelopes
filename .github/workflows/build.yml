@@ -139,6 +139,7 @@ jobs:
       - name: Synthesize the variants
         run: |
           build/envelope-tool synthesize \
+            --ignore-errors \
             --toit-root=toit \
             --output-root=synthesized \
             --sdk-path=build/host/sdk \
