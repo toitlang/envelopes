@@ -134,6 +134,7 @@ variant_synthesize parsed/cli.Parsed --ui/cli.Ui:
     if exception:
       ui.print "Failed to synthesize variant '$variant': $exception"
       catch:
+        directory.mkdir --recursive "$output_root/$variant"
         file.write-content --path="$output_root/$variant/failed" "$exception"
 
 
