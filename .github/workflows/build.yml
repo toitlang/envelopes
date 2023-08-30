@@ -160,7 +160,7 @@ jobs:
           for variant in $VARIANTS; do
             mkdir -p build/$variant
             if [ -e synthesized/$variant/failed ]; then
-              echo "Skipping $variant to due failed synthesis"
+              echo "Skipping $variant to due failed synthesis."
               touch build/$variant/failed
               continue
             fi

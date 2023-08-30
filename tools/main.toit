@@ -135,7 +135,7 @@ variant_synthesize parsed/cli.Parsed --ui/cli.Ui:
           --sdk_path=sdk_path
           --ui=ui
     if exception:
-      ui.print "Failed to synthesize variant '$variant': $exception"
+      ui.print "Failed to synthesize variant '$variant': $exception."
       if not ignore_errors: ui.abort
       catch:
         directory.mkdir --recursive "$output_root/$variant"
