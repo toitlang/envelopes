@@ -157,6 +157,11 @@ jobs:
         run: |
           ccache -s
           for variant in $VARIANTS; do
+            if [ -e synthesized/$variant/failed ]; then
+              echo "Skipping $variant to due failed synthesis"
+              touch build/$variant/failed
+              continue
+            fi
             mkdir -p build/$variant
             (cd synthesized/$variant && make) || touch build/$variant/failed
           done

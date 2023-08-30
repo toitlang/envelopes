@@ -122,13 +122,20 @@ variant_synthesize parsed/cli.Parsed --ui/cli.Ui:
   variants_root := parsed["variants-root"]
   variants := parsed["variant"]
 
-  variants.do: variant_synthesize
-      --variant_path="$variants_root/$it"
-      --toit_root=toit_root
-      --output="$output_root/$it"
-      --build_path="$build_root/$it"
-      --sdk_path=sdk_path
-      --ui=ui
+  variants.do: | variant/string |
+    exception := catch:
+      variant_synthesize
+          --variant_path="$variants_root/$variant"
+          --toit_root=toit_root
+          --output="$output_root/$variant"
+          --build_path="$build_root/$variant"
+          --sdk_path=sdk_path
+          --ui=ui
+    if exception:
+      ui.print "Failed to synthesize variant '$variant': $exception"
+      catch:
+        file.write-content --path="$output_root/$variant/failed" "$exception"
+
 
 variant_synthesize
     --variant_path/string
