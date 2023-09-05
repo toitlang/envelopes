@@ -1,5 +1,5 @@
 --- toolchains/esp32/sdkconfig.defaults	2023-08-31 18:38:18.473937304 +0200
-+++ toolchains/esp32-no-bluetooth/sdkconfig.defaults	2023-09-05 13:16:51.537573071 +0200
++++ toolchains/esp32-no-ble/sdkconfig.defaults	2023-09-05 13:16:51.537573071 +0200
 @@ -9,23 +9,6 @@
  CONFIG_PARTITION_TABLE_CUSTOM=y
  CONFIG_COMPILER_OPTIMIZATION_SIZE=y
