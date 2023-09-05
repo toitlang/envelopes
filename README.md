@@ -58,6 +58,13 @@ octal PSRAM.
 
 These boards are faster, but often more expensive.
 
+### esp32-no-ble
+
+A [variant](variants/esp32-no-ble/) for ESP32 boards.  This variant
+saves some RAM and flash space by removing the Bluetooth stack.
+The saved IRAM enables us to make the Toit interpreter a little faster
+and add support for external RAM (PSRAM, aka SPIRAM).
+
 ## Contributing
 
 Feel free to open issues and pull requests with new variants. Make sure
