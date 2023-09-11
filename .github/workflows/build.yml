@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Output Inputs
+      - name: Show inputs
         run: echo "${{ toJSON(github.event.inputs) }}"
 
       - uses: actions/checkout@v3
