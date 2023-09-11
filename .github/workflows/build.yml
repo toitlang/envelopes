@@ -28,9 +28,13 @@ on:
 
 jobs:
   build:
+    name: "Build for SDK ${{ github.event.inputs.toit-version }}"
     runs-on: ubuntu-latest
 
     steps:
+      - name: Show inputs
+        run: echo "${{ toJSON(github.event.inputs) }}"
+
       - uses: actions/checkout@v3
 
       # Use Go 1.20
