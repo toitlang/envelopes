@@ -28,11 +28,12 @@ It is built for maximum compatibility.
 
 This variant supports Ethernet, but without the clock output.
 
-### esp32-eth-clk-out17
+### esp32-eth-clk-out0 and esp32-eth-clk-out17
 
-A variant for ESP32 boards with Ethernet and a clock output on pin 17.
+A variant for ESP32 boards with Ethernet and a clock output on pin 0/17.
 
-Olimex boards with Ethernet should use this variant.
+Olimex boards with Ethernet should use this variant. The WROOM versions need
+`esp32-eth-clk-out17` and the WROVER versions need `esp32-eth-clk-out0`.
 
 ### esp32c3
 
