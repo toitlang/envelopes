@@ -1,5 +1,6 @@
 .packages/
 .jaguar
+.vscode
 /build/
 /synthesized/
 /toit/
