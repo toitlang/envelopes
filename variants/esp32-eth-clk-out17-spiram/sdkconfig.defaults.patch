@@ -1,5 +1,5 @@
---- toolchains/esp32/sdkconfig.defaults	2023-09-07 17:14:30.952105304 +0200
-+++ toolchains/esp32-eth-clk-out17-spiram/sdkconfig.defaults	2023-09-07 17:20:30.187515185 +0200
+--- toit/toolchains/esp32/sdkconfig.defaults	2023-09-20 11:21:44.091952700 +0200
++++ synn/esp32-eth-clk-out17-spiram/sdkconfig.defaults	2023-09-21 21:26:45.557385967 +0200
 @@ -31,12 +31,16 @@
  # CONFIG_SPI_SLAVE_ISR_IN_IRAM is not set
  CONFIG_UART_ISR_IN_IRAM=y

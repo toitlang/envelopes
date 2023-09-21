@@ -1,5 +1,5 @@
---- toolchains/esp32/sdkconfig.defaults	2023-08-29 10:53:18.779468609 +0200
-+++ toolchains/esp32-qemu/sdkconfig.defaults	2023-08-29 10:54:22.488425944 +0200
+--- toit/toolchains/esp32/sdkconfig.defaults	2023-09-20 11:21:44.091952700 +0200
++++ synn/esp32-qemu/sdkconfig.defaults	2023-09-21 21:26:45.594052040 +0200
 @@ -33,6 +33,7 @@
  # CONFIG_ESP_ERR_TO_NAME_LOOKUP is not set
  CONFIG_ETH_SPI_ETHERNET_DM9051=y

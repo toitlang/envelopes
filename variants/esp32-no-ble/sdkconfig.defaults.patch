@@ -1,5 +1,5 @@
---- toolchains/esp32/sdkconfig.defaults
-+++ toolchains/esp32-no-ble/sdkconfig.defaults
+--- toit/toolchains/esp32/sdkconfig.defaults	2023-09-20 11:21:44.091952700 +0200
++++ synn/esp32-no-ble/sdkconfig.defaults	2023-09-21 21:26:45.760716002 +0200
 @@ -9,23 +9,6 @@
  CONFIG_PARTITION_TABLE_CUSTOM=y
  CONFIG_COMPILER_OPTIMIZATION_SIZE=y
@@ -34,7 +34,7 @@
  CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
  # CONFIG_ESP_INT_WDT is not set
  # CONFIG_ESP_TASK_WDT_EN is not set
-@@ -78,4 +64,3 @@
+@@ -77,4 +63,3 @@
  CONFIG_SPI_FLASH_LOG_FAILED_WRITE=y
  CONFIG_SPI_FLASH_WARN_SETTING_ZERO_TO_ONE=y
  # CONFIG_WS_TRANSPORT is not set
