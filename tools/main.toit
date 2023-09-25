@@ -64,6 +64,9 @@ main args:
             --required,
         cli.Flag "ignore-errors"
             --short_help="Ignore errors when synthesizing variants.",
+        cli.Flag "update-patches"
+            --short_help="Update the patches in the variants."
+            --hidden,
       ]
       --rest=[
           cli.Option "variant"
@@ -124,6 +127,7 @@ variant_synthesize parsed/cli.Parsed --ui/cli.Ui:
   variants_root := parsed["variants-root"]
   variants := parsed["variant"]
   ignore_errors := parsed["ignore-errors"]
+  update_patches := parsed["update-patches"]
 
   variants.do: | variant/string |
     exception := catch:
@@ -133,6 +137,7 @@ variant_synthesize parsed/cli.Parsed --ui/cli.Ui:
           --output="$output_root/$variant"
           --build_path="$build_root/$variant"
           --sdk_path=sdk_path
+          --update_patches=update_patches
           --ui=ui
     if exception:
       ui.print "Failed to synthesize variant '$variant': $exception."
@@ -148,6 +153,7 @@ variant_synthesize
     --output/string
     --build_path/string
     --sdk_path/string
+    --update_patches/bool
     --ui/cli.Ui:
   if file.is_file output:
     ui.print "Output is a file."
@@ -175,6 +181,34 @@ variant_synthesize
       --chip=chip
       --ui=ui
 
+  if update_patches:
+    if file.is_file "$variant_path/partitions.csv.patch":
+      original := "$toit_root/$(toit_partition_path_for_ --chip=chip)"
+      patched := "$output/partitions.csv"
+      update_patch_
+          --from=original
+          --to=patched
+          --output="$variant_path/partitions.csv.patch"
+          --ui=ui
+
+    if file.is_file "$variant_path/sdkconfig.defaults.patch":
+      original := "$toit_root/$(toit_sdk_config_defaults_path_for_ --chip=chip)"
+      patched := "$output/sdkconfig.defaults"
+      update_patch_
+          --from=original
+          --to=patched
+          --output="$variant_path/sdkconfig.defaults.patch"
+          --ui=ui
+
+    if file.is_file "$variant_path/main.patch":
+      original := "$toit_root/$(toit_main_path_for_ --chip=chip)"
+      patched := "$output/main"
+      update_patch_
+          --from=original
+          --to=patched
+          --output="$variant_path/main.patch"
+          --ui=ui
+
 apply_directory_patch_ --patch_path/string --directory/string --strip/int=1:
   patch := file.read_content patch_path
   args := ["patch", "-d", directory]
@@ -185,12 +219,29 @@ apply_directory_patch_ --patch_path/string --directory/string --strip/int=1:
   writer.write patch
   writer.close
 
+// Same as $pipe.from but doesn't throw if the exit code is non-zero.
+pipe_from arguments/List:
+  pipe_ends := pipe.OpenPipe false --child_process_name=arguments[0]
+  stdout := pipe_ends.fd
+  pipes := pipe.fork true pipe.PIPE_INHERITED stdout pipe.PIPE_INHERITED arguments[0] arguments
+  return pipe_ends
+
 apply_file_patch_ --patch_path/string --file_path/string:
   patch := file.read_content patch_path
   args := ["patch", file_path]
   stream := pipe.to args
   writer := Writer stream
   writer.write patch
+  writer.close
+
+update_patch_ --from/string --to/string --output/string --ui/cli.Ui:
+  ui.print "Updating $output."
+  file.delete output
+  args := ["diff", "-aur", from, to]
+  stream := pipe_from args
+  writer := Writer (file.Stream.for_write output)
+  while chunk := stream.read:
+    writer.write chunk
   writer.close
 
 ensure_main_ dir/string --toit_root/string --chip/string:

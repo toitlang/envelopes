@@ -1,6 +1,6 @@
---- toolchains/esp32/sdkconfig.defaults	2023-08-31 18:38:18.473937304 +0200
-+++ toolchains/esp32-log-wifi/sdkconfig.defaults	2023-09-05 13:20:04.990901463 +0200
-@@ -54,7 +54,7 @@
+--- toit/toolchains/esp32/sdkconfig.defaults	2023-09-20 11:21:44.091952700 +0200
++++ synn/esp32-log-wifi/sdkconfig.defaults	2023-09-21 21:26:45.744049606 +0200
+@@ -53,7 +53,7 @@
  CONFIG_FREERTOS_ISR_STACKSIZE=2096
  CONFIG_FREERTOS_PLACE_FUNCTIONS_INTO_FLASH=y
  # CONFIG_FREERTOS_ENABLE_TASK_SNAPSHOT is not set
@@ -9,7 +9,7 @@
  # CONFIG_LOG_COLORS is not set
  CONFIG_LWIP_LOCAL_HOSTNAME="toit"
  # CONFIG_LWIP_DNS_SUPPORT_MDNS_QUERIES is not set
-@@ -78,4 +78,5 @@
+@@ -77,4 +77,5 @@
  CONFIG_SPI_FLASH_LOG_FAILED_WRITE=y
  CONFIG_SPI_FLASH_WARN_SETTING_ZERO_TO_ONE=y
  # CONFIG_WS_TRANSPORT is not set
