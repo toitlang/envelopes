@@ -189,6 +189,7 @@ variant_synthesize
           --from=original
           --to=patched
           --output="$variant_path/partitions.csv.patch"
+          --ui=ui
 
     if file.is_file "$variant_path/sdkconfig.defaults.patch":
       original := "$toit_root/$(toit_sdk_config_defaults_path_for_ --chip=chip)"
@@ -197,6 +198,7 @@ variant_synthesize
           --from=original
           --to=patched
           --output="$variant_path/sdkconfig.defaults.patch"
+          --ui=ui
 
     if file.is_file "$variant_path/main.patch":
       original := "$toit_root/$(toit_main_path_for_ --chip=chip)"
@@ -205,6 +207,7 @@ variant_synthesize
           --from=original
           --to=patched
           --output="$variant_path/main.patch"
+          --ui=ui
 
 apply_directory_patch_ --patch_path/string --directory/string --strip/int=1:
   patch := file.read_content patch_path
@@ -231,8 +234,8 @@ apply_file_patch_ --patch_path/string --file_path/string:
   writer.write patch
   writer.close
 
-update_patch_ --from/string --to/string --output/string:
-  print "updating $output"
+update_patch_ --from/string --to/string --output/string --ui/cli.Ui:
+  ui.print "Updating $output."
   file.delete output
   args := ["diff", "-aur", from, to]
   stream := pipe_from args
