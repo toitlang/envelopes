@@ -63,9 +63,11 @@ main args:
             --short_help="The root directory of the variants."
             --required,
         cli.Flag "ignore-errors"
-            --short_help="Ignore errors when synthesizing variants.",
+            --short_help="Ignore errors when synthesizing variants."
+            --default=false,
         cli.Flag "update-patches"
             --short_help="Update the patches in the variants."
+            --default=false
             --hidden,
       ]
       --rest=[
