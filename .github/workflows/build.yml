@@ -89,6 +89,10 @@ jobs:
         run: |
           make TOIT_VERSION=${{ github.event.inputs.toit-version }} download-toit
 
+      - name: Ccache stats before SDK build
+        run: |
+          ccache -s
+
       - name: Build the host SDK
         env:
           IDF_CCACHE_ENABLE: 1
@@ -96,10 +100,12 @@ jobs:
           CCACHE_BASEDIR: ${{ github.workspace }}
           CCACHE_COMPRESS: true
           CCACHE_COMPRESSLEVEL: '6'
-          CCACHE_MAXSIZE: 400M
+          CCACHE_MAXSIZE: 600M
         run: |
-          ccache -s
           make build-host
+
+      - name: Ccache stats after SDK build
+        run: |
           ccache -s
 
       - name: Build the envelope tool
@@ -151,6 +157,10 @@ jobs:
             --build-root=build \
             $VARIANTS
 
+      - name: Ccache stats before variants build
+        run: |
+          ccache -s
+
       - name: Build the variants
         env:
           IDF_CCACHE_ENABLE: 1
@@ -158,9 +168,8 @@ jobs:
           CCACHE_BASEDIR: ${{ github.workspace }}
           CCACHE_COMPRESS: true
           CCACHE_COMPRESSLEVEL: '6'
-          CCACHE_MAXSIZE: 400M
+          CCACHE_MAXSIZE: 600M
         run: |
-          ccache -s
           for variant in $VARIANTS; do
             mkdir -p build/$variant
             if [ -e synthesized/$variant/failed ]; then
@@ -168,8 +177,12 @@ jobs:
               touch build/$variant/failed
               continue
             fi
+            ccache -s
             (cd synthesized/$variant && make) || touch build/$variant/failed
           done
+
+      - name: Ccache stats after variants build
+        run: |
           ccache -s
 
       - name: Prepare envelopes for upload
