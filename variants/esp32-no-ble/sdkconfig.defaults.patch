@@ -1,5 +1,5 @@
---- toit/toolchains/esp32/sdkconfig.defaults	2023-09-20 11:21:44.091952700 +0200
-+++ synn/esp32-no-ble/sdkconfig.defaults	2023-09-21 21:26:45.760716002 +0200
+--- /home/flo/code/envelopes/../opentoit/toolchains/esp32/sdkconfig.defaults	2023-10-25 16:02:07.900402881 +0200
++++ synthesized/esp32-no-ble/sdkconfig.defaults	2023-10-25 16:13:45.242920135 +0200
 @@ -9,23 +9,6 @@
  CONFIG_PARTITION_TABLE_CUSTOM=y
  CONFIG_COMPILER_OPTIMIZATION_SIZE=y
@@ -33,8 +33,8 @@
 +CONFIG_SPIRAM_USE_CAPS_ALLOC=y
  CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
  # CONFIG_ESP_INT_WDT is not set
- # CONFIG_ESP_TASK_WDT_EN is not set
-@@ -77,4 +63,3 @@
+ # CONFIG_ESP_TASK_WDT_INIT is not set
+@@ -76,4 +62,3 @@
  CONFIG_SPI_FLASH_LOG_FAILED_WRITE=y
  CONFIG_SPI_FLASH_WARN_SETTING_ZERO_TO_ONE=y
  # CONFIG_WS_TRANSPORT is not set
