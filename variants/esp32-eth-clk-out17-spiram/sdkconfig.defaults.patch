@@ -1,5 +1,5 @@
---- /home/flo/code/envelopes/../opentoit/toolchains/esp32/sdkconfig.defaults	2023-10-25 16:02:07.900402881 +0200
-+++ synthesized/esp32-eth-clk-out17-spiram/sdkconfig.defaults	2023-10-25 16:13:45.032923400 +0200
+--- /home/flo/code/envelopes/../opentoit/toolchains/esp32/sdkconfig.defaults	2023-11-07 13:46:26.856085190 +0100
++++ synthesized/esp32-eth-clk-out17-spiram/sdkconfig.defaults	2023-11-07 13:48:07.821059269 +0100
 @@ -31,12 +31,16 @@
  # CONFIG_SPI_SLAVE_ISR_IN_IRAM is not set
  CONFIG_UART_ISR_IN_IRAM=y
@@ -25,7 +25,7 @@
  CONFIG_FATFS_LFN_HEAP=y
  CONFIG_FREERTOS_THREAD_LOCAL_STORAGE_POINTERS=3
  CONFIG_FREERTOS_IDLE_TASK_STACKSIZE=1024
-@@ -76,4 +79,5 @@
+@@ -73,4 +76,5 @@
  CONFIG_SPI_FLASH_LOG_FAILED_WRITE=y
  CONFIG_SPI_FLASH_WARN_SETTING_ZERO_TO_ONE=y
  # CONFIG_WS_TRANSPORT is not set

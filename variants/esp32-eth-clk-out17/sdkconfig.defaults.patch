@@ -1,5 +1,5 @@
---- /home/flo/code/envelopes/../opentoit/toolchains/esp32/sdkconfig.defaults	2023-10-25 16:02:07.900402881 +0200
-+++ synthesized/esp32-eth-clk-out17/sdkconfig.defaults	2023-10-25 16:13:45.019590274 +0200
+--- /home/flo/code/envelopes/../opentoit/toolchains/esp32/sdkconfig.defaults	2023-11-07 13:46:26.856085190 +0100
++++ synthesized/esp32-eth-clk-out17/sdkconfig.defaults	2023-11-07 13:48:07.807726160 +0100
 @@ -31,6 +31,7 @@
  # CONFIG_SPI_SLAVE_ISR_IN_IRAM is not set
  CONFIG_UART_ISR_IN_IRAM=y
