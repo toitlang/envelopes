@@ -1,6 +1,6 @@
-# ESP32-SYNAP
+# ESP32S3-SYNAP
 
-A variant of the ESP32 envelope that changes the default UART RX pin to
+A variant of the ESP32S3 envelope that changes the default UART RX pin to
 pin 7. This frees up the default RX pin (44) for use as a GPIO.
 
 Also sets the size of the OTA partitions to 0x1C0000 (1835008) bytes.
