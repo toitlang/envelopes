@@ -35,7 +35,7 @@ jobs:
       - name: Show inputs
         run: echo "${{ toJSON(github.event.inputs) }}"
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Use Go 1.20
       - name: Switch to Go 1.20
@@ -53,7 +53,7 @@ jobs:
 
       # Cache go build cache, used to speedup go test
       - name: Go Build Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.go-cache-paths.outputs.go-build }}
           key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
@@ -61,14 +61,14 @@ jobs:
 
       # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.go-cache-paths.outputs.go-mod }}
           key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
           restore-keys: ${{ runner.os }}-go-mod-
 
       - name: Ccache cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         # Store and retrieve the cache with the given sha.
         # The 'restore-keys' prefix finds the most recent cache in case there
         # is no match (which should almost always be the case).
@@ -198,7 +198,7 @@ jobs:
           done
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: artifacts
           path: |
