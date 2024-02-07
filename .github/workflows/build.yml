@@ -12,6 +12,11 @@ on:
         description: Toit SDK version to check out
         required: true
         type: string
+      branch:
+        description: Branch to check out (overrides toit-version)
+        required: false
+        type: string
+        default: ""
       upload-release:
         description: Upload release artifacts
         required: true
@@ -85,9 +90,20 @@ jobs:
           cmake --version
           gcc --version
 
+      - name: Set the git version
+        run: |
+          echo "TOIT_GIT_VERSION=${{ github.event.inputs.toit-version }}" >> $GITHUB_ENV
+
       - name: Fetch the Toit repository
         run: |
-          make TOIT_VERSION=${{ github.event.inputs.toit-version }} download-toit
+          # We allow the workflow dispatch to override the checked out branch.
+          # Note that we set the TOIT_GIT_VERSION env variable. The checked out branch
+          # thus doesn't influence the version of the SDK we build.
+          REF=${{ github.event.inputs.branch }}
+          if [[ -z "$REF" ]]; then
+            REF=${{ github.event.inputs.toit-version }}
+          fi
+          make TOIT_VERSION=$REF download-toit
 
       - name: Ccache stats before SDK build
         run: |
