@@ -1,4 +1,4 @@
-# ESP32-ETH-CLK-OUT17-SPIRAM
+# ESP32-SEDISTO
 
 A variant of the ESP32 envelope that supports ethernet. The ESP32
 outputs the PHY's clock on pin 0. This variant furthermore enables
