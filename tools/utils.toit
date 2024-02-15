@@ -7,6 +7,7 @@ import host.file
 import host.os
 import host.pipe
 import writer
+import system show platform PLATFORM_WINDOWS
 
 with_tmp_directory [block]:
   tmpdir := directory.mkdtemp "/tmp/artemis-"
