@@ -2,7 +2,7 @@
 // Use of this from code is governed by an MIT-style license that can be
 // found in the LICENSE_MIT file.
 
-import bytes
+import io
 import host.pipe
 import monitor
 import cli show Ui
@@ -181,8 +181,8 @@ class Git:
     return run_ args --description="Git command"
 
   run_ args/List --description -> string:
-    output := bytes.Buffer
-    stdout := bytes.Buffer
+    output := io.Buffer
+    stdout := io.Buffer
     fork_data := pipe.fork
         --environment=git_env_
         true                // use_path
