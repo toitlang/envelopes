@@ -6,7 +6,7 @@ import host.directory
 import host.file
 import host.os
 import host.pipe
-import writer
+import system show platform PLATFORM_WINDOWS
 
 with_tmp_directory [block]:
   tmpdir := directory.mkdtemp "/tmp/artemis-"
@@ -19,8 +19,7 @@ copy_file --from/string --to/string:
   in_stream := file.Stream.for_read from
   out_stream := file.Stream.for_write to
   try:
-    writer := writer.Writer out_stream
-    writer.write_from in_stream
+    out_stream.out.write_from in_stream.in
     // TODO(florian): we would like to close the writer here, but then
     // we would get an "already closed" below.
   finally:
