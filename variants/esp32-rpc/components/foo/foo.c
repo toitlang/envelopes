@@ -1,42 +1,51 @@
 #include <stdio.h>
-#include <toit/cmessaging.h>
+#include <toit/ctoit.h>
 
-static void on_created(void* user_context, HandlerContext* handler_context);
-static void on_message(void* user_context, int sender, int type, void* data, int length);
-static void on_release(void* user_context);
+static toit_err_t start(void* user_context, process_context_t* process_context);
+static toit_err_t on_message(void* user_context, int sender, int type, void* data, int length);
+static toit_err_t on_removed(void* user_context);
 
-typedef struct Handler {
-  HandlerContext* handler_context;
-} Handler;
+typedef struct process_t {
+  process_context_t process_context;
+} process_t;
 
 void __attribute__((constructor)) init() {
-  printf("registering handler\n");
-  Handler* user_context = (Handler*)malloc(sizeof(Handler));
+  printf("registering process\n");
+  process_t* user_context = (process_t*)malloc(sizeof(process_t));
   if (!user_context) {
     printf("unable to allocate user context\n");
     return;
   }
-  toit_register_external_message_handler(user_context, 0, &on_created);
+  toit_register_external_process(user_context, 0, &start);
 }
 
-static void on_created(void* user_context, HandlerContext* handler_context) {
-  Handler* handler = (Handler*)(user_context);
-  handler->handler_context = handler_context;
-  toit_set_callbacks(handler_context, &on_message, &on_release);
+static toit_err_t start(void* user_context, process_context_t* process_context) {
+  process_t* process = (process_t*)(user_context);
+  process->process_context = process_context;
+  toit_err_t err = toit_set_callbacks(process_context, {
+    .on_message = &on_message,
+    .on_removed = &on_removed,
+  });
+  if (err != TOIT_ERR_SUCCESS) {
+    printf("unable to set callbacks\n");
+  }
+  return TOIT_ERR_SUCCESS;
 }
 
-static void on_message(void* user_context, int sender, int type, void* data, int length) {
+static toit_err_t on_message(void* user_context, int sender, int type, void* data, int length) {
   printf("received message in C\n");
-  Handler* handler = (Handler*)(user_context);
-  if (!toit_send_message(handler->handler_context, sender, type + 1, data, length, true)) {
+  process_t* process = (process_t*)(user_context);
+  if (toit_send_message(process->process_context, sender, type + 1, data, length, true) != TOIT_ERR_SUCCESS) {
     printf("unable to send\n");
   }
   if (length == 2 && ((char*)data)[0] == 99 && ((char*)data)[1] == 99) {
-    toit_release_handler(handler->handler_context);
+    toit_remove_process(process->process_context);
   }
+  return TOIT_ERR_SUCCESS;
 }
 
-static void on_release(void* user_context) {
+static toit_err_t on_removed(void* user_context) {
   printf("freeing user context\n");
   free(user_context);
+  return TOIT_ERR_SUCCESS;
 }
