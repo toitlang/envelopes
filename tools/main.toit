@@ -28,17 +28,17 @@ main args:
   root_cmd := cli.Command "root"
 
   variant_list_cmd := cli.Command "list"
-      --short_help="List all variants."
+      --help="List all variants."
       --rest=[
         cli.Option "root"
-            --short_help="The root directory to list variants from."
+            --help="The root directory to list variants from."
             --default="variants",
       ]
       --run=:: variant_list it --ui=ui
   root_cmd.add variant_list_cmd
 
   variant_synthesize_cmd := cli.Command "synthesize"
-      --long_help="""
+      --help="""
         Synthesize the given variants.
 
         Generates a project that can be compiled for each variant.
@@ -49,30 +49,30 @@ main args:
       --options=[
         cli.Option "output-root"
             --short_name="o"
-            --short_help="The output directory to synthesize the variants to.",
+            --help="The output directory to synthesize the variants to.",
         cli.Option "toit-root"
-            --short_help="The root directory of the Toit SDK."
+            --help="The root directory of the Toit SDK."
             --required,
         cli.Option "build-root"
-            --short_help="The output directory for the compilation."
+            --help="The output directory for the compilation."
             --required,
         cli.Option "sdk-path"
-            --short_help="The path to the Toit SDK. Typically in build/host/sdk."
+            --help="The path to the Toit SDK. Typically in build/host/sdk."
             --required,
         cli.Option "variants-root"
-            --short_help="The root directory of the variants."
+            --help="The root directory of the variants."
             --required,
         cli.Flag "ignore-errors"
-            --short_help="Ignore errors when synthesizing variants."
+            --help="Ignore errors when synthesizing variants."
             --default=false,
         cli.Flag "update-patches"
-            --short_help="Update the patches in the variants."
+            --help="Update the patches in the variants."
             --default=false
             --hidden,
       ]
       --rest=[
           cli.Option "variant"
-              --short_help="The variant to synthesize."
+              --help="The variant to synthesize."
               --required
               --multi,
       ]
@@ -80,16 +80,16 @@ main args:
   root_cmd.add variant_synthesize_cmd
 
   download_gist_cmd := cli.Command "download-gist"
-      --long_help="Download all files of the given gist URL."
+      --help="Download all files of the given gist URL."
       --options=[
         cli.Option "output"
             --short_name="o"
-            --short_help="The output directory to download the gist to."
+            --help="The output directory to download the gist to."
             --required,
       ]
       --rest=[
           cli.Option "gist-url"
-              --short_help="The URL of the gist to download."
+              --help="The URL of the gist to download."
               --required,
       ]
       --run=:: download_gist it --ui=ui
@@ -217,9 +217,8 @@ apply_directory_patch_ --patch_path/string --directory/string --strip/int=1:
   if strip > 0:
     args.add "-p$strip"
   stream := pipe.to args
-  writer := Writer stream
-  writer.write patch
-  writer.close
+  stream.out.write patch
+  stream.close
 
 // Same as $pipe.from but doesn't throw if the exit code is non-zero.
 pipe_from arguments/List:
@@ -232,19 +231,19 @@ apply_file_patch_ --patch_path/string --file_path/string:
   patch := file.read_content patch_path
   args := ["patch", file_path]
   stream := pipe.to args
-  writer := Writer stream
-  writer.write patch
-  writer.close
+  stream.out.write patch
+  stream.close
 
 update_patch_ --from/string --to/string --output/string --ui/cli.Ui:
   ui.print "Updating $output."
   file.delete output
   args := ["diff", "-aur", from, to]
   stream := pipe_from args
-  writer := Writer (file.Stream.for_write output)
+  out_stream := file.Stream.for_write output
+  writer := out_stream.out
   while chunk := stream.read:
     writer.write chunk
-  writer.close
+  out_stream.close
 
 ensure_main_ dir/string --toit_root/string --chip/string:
   if file.is_directory "$dir/main": return
