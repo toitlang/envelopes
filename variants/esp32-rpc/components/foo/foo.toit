@@ -3,7 +3,7 @@ import expect
 import monitor
 
 TYPE ::= 100  // Don't overlap with system messages.
-EXTERNAL_PID ::= 0
+EXTERNAL_PID ::= pid-for-external-id_ "toit.io/external-test"
 
 main:
   print "starting"

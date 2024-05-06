@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <toit/ctoit.h>
 
-static toit_err_t start(void* user_context, process_context_t* process_context);
+static toit_err_t start(void* user_context, toit_process_context_t* process_context);
 static toit_err_t on_message(void* user_context, int sender, int type, void* data, int length);
 static toit_err_t on_removed(void* user_context);
 
 typedef struct process_t {
-  process_context_t process_context;
+  toit_process_context_t* process_context;
 } process_t;
 
 void __attribute__((constructor)) init() {
@@ -16,16 +16,18 @@ void __attribute__((constructor)) init() {
     printf("unable to allocate user context\n");
     return;
   }
-  toit_register_external_process(user_context, 0, &start);
+  toit_add_external_process(user_context, "toit.io/external-test", &start);
 }
 
-static toit_err_t start(void* user_context, process_context_t* process_context) {
+static toit_err_t start(void* user_context, toit_process_context_t* process_context) {
+  printf("starting process\n");
   process_t* process = (process_t*)(user_context);
   process->process_context = process_context;
-  toit_err_t err = toit_set_callbacks(process_context, {
+  toit_process_cbs_t cbs = {
     .on_message = &on_message,
     .on_removed = &on_removed,
-  });
+  };
+  toit_err_t err = toit_set_callbacks(process_context, cbs);
   if (err != TOIT_ERR_SUCCESS) {
     printf("unable to set callbacks\n");
   }
