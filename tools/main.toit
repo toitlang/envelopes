@@ -8,7 +8,6 @@ import host.directory
 import host.pipe
 import writer show Writer
 import .gist as gist
-import .git
 import .utils
 
 GIT_URL ::= "https://github.com/toitlang/toit.git"
