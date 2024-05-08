@@ -3,6 +3,7 @@
 // found in the LICENSE_MIT file.
 
 import cli
+import fs
 import host.file
 import host.directory
 import host.pipe
@@ -76,6 +77,14 @@ main args:
               --multi,
       ]
       --run=:: variant-synthesize it --ui=ui
+      --examples=[
+        cli.Example """
+            Synthesize variant 'variants/esp32-qemu' into 'synthesized/esp32-qemu', with
+            Toit checked out in the 'toit' directory, the build directory set to 'build',
+            and the SDK path set to 'build/host/sdk':"""
+            --global-priority=1
+            --arguments="--toit-root=toit --build-root=build --output-root=synthesized --sdk-path=build/host/sdk --variants-root=variants esp32-qemu"
+      ]
   root-cmd.add variant-synthesize-cmd
 
   download-gist-cmd := cli.Command "download-gist"
@@ -280,10 +289,10 @@ create-cmakelists_ dir/string --toit-root/string --sdk-path/string --chip/string
     ui.print "CMakeLists.txt already exists."
     ui.abort
 
-  absolute-toit-root := make-absolute-slashed toit-root
-  absolute-sdk-path := make-absolute-slashed sdk-path
-  idf-component-path := "$absolute-toit-root/$TOIT-IDF-COMPONENT-PATH"
-  idf-path := "$absolute-toit-root/third_party/esp-idf"
+  cmake-toit-root := to-cmake-path --relative-to=dir toit_root
+  cmake-sdk-path := to-cmake-path --relative-to=dir sdk_path
+  idf_component_path := "$cmake-toit-root/$TOIT_IDF_COMPONENT_PATH"
+  idf_path := "$cmake-toit-root/third_party/esp-idf"
 
   // This doesn't work if the paths '"' characters.
   // Should be pretty rare.
@@ -291,7 +300,7 @@ create-cmakelists_ dir/string --toit-root/string --sdk-path/string --chip/string
     cmake_minimum_required(VERSION 3.5)
 
     set(IDF_PATH "$idf-path" CACHE FILEPATH "Path to the ESP-IDF directory")
-    set(TOIT_SDK_DIR "$absolute-sdk-path" CACHE FILEPATH "Path to the Toit SDK directory")
+    set(TOIT_SDK_DIR "$cmake-sdk-path" CACHE FILEPATH "Path to the Toit SDK directory")
 
     list(APPEND EXTRA_COMPONENT_DIRS "$idf-component-path")
 
@@ -306,10 +315,13 @@ create-cmakelists_ dir/string --toit-root/string --sdk-path/string --chip/string
 create-makefile_ dir/string --toit-root/string --build-path/string --chip/string --ui/cli.Ui:
   if file.is-file "$dir/Makefile": return
 
-  absolute-toit-root := make-absolute-slashed toit-root
-  idf-path := "$absolute-toit-root/third_party/esp-idf"
+  makefile-toit-root := to-makefile-path --relative-to=dir toit-root
+  idf-path := "$makefile-toit-root/third_party/esp-idf"
+  if not fs.is-absolute idf-path:
+    // Use the Makefile $PWD to make the path absolute.
+    idf-path = "\$(PWD)/$idf-path"
 
-  absolute-build-path := make-absolute-slashed build-path
+  makefile-build-path := to-makefile-path --relative-to=dir build-path
 
   // This doesn't work if the paths '"' characters.
   // Should be pretty rare.
@@ -319,8 +331,8 @@ create-makefile_ dir/string --toit-root/string --build-path/string --chip/string
 
     IDF_PATH := $idf-path
     IDF_PY := \$(IDF_PATH)/tools/idf.py
-    TOIT_ROOT := $absolute-toit-root
-    BUILD_PATH := $absolute-build-path
+    TOIT_ROOT := $makefile-toit-root
+    BUILD_PATH := $makefile-build-path
 
     ifeq (\$(OS),Windows_NT)
     \tEXE_SUFFIX=.exe
