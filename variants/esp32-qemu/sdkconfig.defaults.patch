@@ -1,5 +1,5 @@
---- /home/flo/code/envelopes/../opentoit/toolchains/esp32/sdkconfig.defaults	2023-11-07 13:46:26.856085190 +0100
-+++ synthesized/esp32-qemu/sdkconfig.defaults	2023-11-07 13:48:07.847725489 +0100
+--- toit/toolchains/esp32/sdkconfig.defaults
++++ synthesized/esp32-qemu/sdkconfig.defaults
 @@ -33,6 +33,7 @@
  # CONFIG_ESP_ERR_TO_NAME_LOOKUP is not set
  CONFIG_ETH_SPI_ETHERNET_DM9051=y

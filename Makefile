@@ -12,6 +12,9 @@ else
 	EXE_SUFFIX :=
 endif
 
+# Set to '--update-patches' to update all patches.
+UPDATE_PATCHES :=
+
 TOIT_EXEC := toit.run$(EXE_SUFFIX)
 
 TOIT_DIRECTORY := toit
@@ -63,7 +66,12 @@ synthesize-all: | create-build-directory create-synthesized-directory
 			--output-root="$(SYNTHESIZED_DIRECTORY)" \
 			--sdk-path="$(TOIT_SDK_DIRECTORY)" \
 			--variants-root="$(VARIANTS_DIRECTORY)" \
+			$(UPDATE_PATCHES) \
 			$(shell $(TOOL_RUN) list variants)
+
+.PHONY: update-patches
+update-patches:
+	$(MAKE) UPDATE_PATCHES=--update-patches synthesize-all
 
 .PHONY: create-build-directory
 create-build-directory:

@@ -245,7 +245,8 @@ apply-file-patch_ --patch-path/string --file-path/string:
 update-patch_ --from/string --to/string --output/string --ui/cli.Ui:
   ui.print "Updating $output."
   file.delete output
-  args := ["diff", "-aur", from, to]
+  // Use labels to avoid the timestamp.
+  args := ["diff", "-aur", "--label", from, "--label", to, from, to]
   stream := pipe-from args
   out-stream := file.Stream.for-write output
   writer := out-stream.out
