@@ -10,33 +10,33 @@ import writer show Writer
 import .gist as gist
 import .utils
 
-GIT_URL ::= "https://github.com/toitlang/toit.git"
-TOIT_IDF_COMPONENT_PATH ::= "toolchains/idf/components"
+GIT-URL ::= "https://github.com/toitlang/toit.git"
+TOIT-IDF-COMPONENT-PATH ::= "toolchains/idf/components"
 
-toit_partition_path_for_ --chip/string -> string:
+toit-partition-path-for_ --chip/string -> string:
   return "toolchains/$chip/partitions.csv"
-toit_sdk_config_path_for_ --chip/string -> string:
+toit-sdk-config-path-for_ --chip/string -> string:
   return "toolchains/$chip/sdkconfig"
-toit_sdk_config_defaults_path_for_ --chip/string -> string:
+toit-sdk-config-defaults-path-for_ --chip/string -> string:
   return "toolchains/$chip/sdkconfig.defaults"
-toit_main_path_for_ --chip/string -> string:
+toit-main-path-for_ --chip/string -> string:
   return "toolchains/$chip/main"
 
 main args:
   ui := Ui_
-  root_cmd := cli.Command "root"
+  root-cmd := cli.Command "root"
 
-  variant_list_cmd := cli.Command "list"
+  variant-list-cmd := cli.Command "list"
       --help="List all variants."
       --rest=[
         cli.Option "root"
             --help="The root directory to list variants from."
             --default="variants",
       ]
-      --run=:: variant_list it --ui=ui
-  root_cmd.add variant_list_cmd
+      --run=:: variant-list it --ui=ui
+  root-cmd.add variant-list-cmd
 
-  variant_synthesize_cmd := cli.Command "synthesize"
+  variant-synthesize-cmd := cli.Command "synthesize"
       --help="""
         Synthesize the given variants.
 
@@ -47,7 +47,7 @@ main args:
         """
       --options=[
         cli.Option "output-root"
-            --short_name="o"
+            --short-name="o"
             --help="The output directory to synthesize the variants to.",
         cli.Option "toit-root"
             --help="The root directory of the Toit SDK."
@@ -75,14 +75,14 @@ main args:
               --required
               --multi,
       ]
-      --run=:: variant_synthesize it --ui=ui
-  root_cmd.add variant_synthesize_cmd
+      --run=:: variant-synthesize it --ui=ui
+  root-cmd.add variant-synthesize-cmd
 
-  download_gist_cmd := cli.Command "download-gist"
+  download-gist-cmd := cli.Command "download-gist"
       --help="Download all files of the given gist URL."
       --options=[
         cli.Option "output"
-            --short_name="o"
+            --short-name="o"
             --help="The output directory to download the gist to."
             --required,
       ]
@@ -91,127 +91,127 @@ main args:
               --help="The URL of the gist to download."
               --required,
       ]
-      --run=:: download_gist it --ui=ui
-  root_cmd.add download_gist_cmd
+      --run=:: download-gist it --ui=ui
+  root-cmd.add download-gist-cmd
 
-  root_cmd.run args --ui=ui
+  root-cmd.run args --ui=ui
 
-variant_list parsed/cli.Parsed --ui/cli.Ui:
+variant-list parsed/cli.Parsed --ui/cli.Ui:
   root := parsed["root"]
-  variants := variant_list --root=root --ui=ui
+  variants := variant-list --root=root --ui=ui
   variants.do: ui.print it
 
-variant_list --root/string --ui/cli.Ui -> List:
+variant-list --root/string --ui/cli.Ui -> List:
   result := []
 
-  variant_stream := directory.DirectoryStream root
-  while variant := variant_stream.next:
+  variant-stream := directory.DirectoryStream root
+  while variant := variant-stream.next:
     // First level of directory entries are the chips.
-    if not file.is_directory "$root/$variant":
+    if not file.is-directory "$root/$variant":
       // Skip over files like "README.md".
       continue
 
     result.add variant
-  variant_stream.close
+  variant-stream.close
   return result
 
-download_gist parsed/cli.Parsed --ui/cli.Ui:
+download-gist parsed/cli.Parsed --ui/cli.Ui:
   output := parsed["output"]
-  gist_url := parsed["gist-url"]
-  gist.download --output=output --gist_url=gist_url --ui=ui
+  gist-url := parsed["gist-url"]
+  gist.download --output=output --gist-url=gist-url --ui=ui
 
-variant_synthesize parsed/cli.Parsed --ui/cli.Ui:
-  toit_root := parsed["toit-root"]
-  output_root := parsed["output-root"]
-  build_root := parsed["build-root"]
-  sdk_path := parsed["sdk-path"]
-  variants_root := parsed["variants-root"]
+variant-synthesize parsed/cli.Parsed --ui/cli.Ui:
+  toit-root := parsed["toit-root"]
+  output-root := parsed["output-root"]
+  build-root := parsed["build-root"]
+  sdk-path := parsed["sdk-path"]
+  variants-root := parsed["variants-root"]
   variants := parsed["variant"]
-  ignore_errors := parsed["ignore-errors"]
-  update_patches := parsed["update-patches"]
+  ignore-errors := parsed["ignore-errors"]
+  update-patches := parsed["update-patches"]
 
   variants.do: | variant/string |
     exception := catch:
-      variant_synthesize
-          --variant_path="$variants_root/$variant"
-          --toit_root=toit_root
-          --output="$output_root/$variant"
-          --build_path="$build_root/$variant"
-          --sdk_path=sdk_path
-          --update_patches=update_patches
+      variant-synthesize
+          --variant-path="$variants-root/$variant"
+          --toit-root=toit-root
+          --output="$output-root/$variant"
+          --build-path="$build-root/$variant"
+          --sdk-path=sdk-path
+          --update-patches=update-patches
           --ui=ui
     if exception:
       ui.print "Failed to synthesize variant '$variant': $exception."
-      if not ignore_errors: ui.abort
+      if not ignore-errors: ui.abort
       catch:
-        directory.mkdir --recursive "$output_root/$variant"
-        file.write-content --path="$output_root/$variant/failed" "$exception"
+        directory.mkdir --recursive "$output-root/$variant"
+        file.write-content --path="$output-root/$variant/failed" "$exception"
 
 
-variant_synthesize
-    --variant_path/string
-    --toit_root/string
+variant-synthesize
+    --variant-path/string
+    --toit-root/string
     --output/string
-    --build_path/string
-    --sdk_path/string
-    --update_patches/bool
+    --build-path/string
+    --sdk-path/string
+    --update-patches/bool
     --ui/cli.Ui:
-  if file.is_file output:
+  if file.is-file output:
     ui.print "Output is a file."
     ui.abort
 
-  copy_directory --from="$variant_path/" --to="$output/"
+  copy-directory --from="$variant-path/" --to="$output/"
 
-  chip_variant := extract_chip_variant_ variant_path --ui=ui
-  chip := chip_variant[0]
+  chip-variant := extract-chip-variant_ variant-path --ui=ui
+  chip := chip-variant[0]
 
-  ensure_main_ output --toit_root=toit_root --chip=chip
-  ensure_partitions_ output --toit_root=toit_root --chip=chip
-  ensure_sdkconfig_ output --toit_root=toit_root --chip=chip --ui=ui
-  create_cmakelists_
+  ensure-main_ output --toit-root=toit-root --chip=chip
+  ensure-partitions_ output --toit-root=toit-root --chip=chip
+  ensure-sdkconfig_ output --toit-root=toit-root --chip=chip --ui=ui
+  create-cmakelists_
       output
-      --toit_root=toit_root
-      --sdk_path=sdk_path
+      --toit-root=toit-root
+      --sdk-path=sdk-path
       --chip=chip
       --ui=ui
 
-  create_makefile_
+  create-makefile_
       output
-      --toit_root=toit_root
-      --build_path=build_path
+      --toit-root=toit-root
+      --build-path=build-path
       --chip=chip
       --ui=ui
 
-  if update_patches:
-    if file.is_file "$variant_path/partitions.csv.patch":
-      original := "$toit_root/$(toit_partition_path_for_ --chip=chip)"
+  if update-patches:
+    if file.is-file "$variant-path/partitions.csv.patch":
+      original := "$toit-root/$(toit-partition-path-for_ --chip=chip)"
       patched := "$output/partitions.csv"
-      update_patch_
+      update-patch_
           --from=original
           --to=patched
-          --output="$variant_path/partitions.csv.patch"
+          --output="$variant-path/partitions.csv.patch"
           --ui=ui
 
-    if file.is_file "$variant_path/sdkconfig.defaults.patch":
-      original := "$toit_root/$(toit_sdk_config_defaults_path_for_ --chip=chip)"
+    if file.is-file "$variant-path/sdkconfig.defaults.patch":
+      original := "$toit-root/$(toit-sdk-config-defaults-path-for_ --chip=chip)"
       patched := "$output/sdkconfig.defaults"
-      update_patch_
+      update-patch_
           --from=original
           --to=patched
-          --output="$variant_path/sdkconfig.defaults.patch"
+          --output="$variant-path/sdkconfig.defaults.patch"
           --ui=ui
 
-    if file.is_file "$variant_path/main.patch":
-      original := "$toit_root/$(toit_main_path_for_ --chip=chip)"
+    if file.is-file "$variant-path/main.patch":
+      original := "$toit-root/$(toit-main-path-for_ --chip=chip)"
       patched := "$output/main"
-      update_patch_
+      update-patch_
           --from=original
           --to=patched
-          --output="$variant_path/main.patch"
+          --output="$variant-path/main.patch"
           --ui=ui
 
-apply_directory_patch_ --patch_path/string --directory/string --strip/int=1:
-  patch := file.read_content patch_path
+apply-directory-patch_ --patch-path/string --directory/string --strip/int=1:
+  patch := file.read-content patch-path
   args := ["patch", "-d", directory]
   if strip > 0:
     args.add "-p$strip"
@@ -220,80 +220,80 @@ apply_directory_patch_ --patch_path/string --directory/string --strip/int=1:
   stream.close
 
 // Same as $pipe.from but doesn't throw if the exit code is non-zero.
-pipe_from arguments/List:
-  pipe_ends := pipe.OpenPipe false --child_process_name=arguments[0]
-  stdout := pipe_ends.fd
-  pipes := pipe.fork true pipe.PIPE_INHERITED stdout pipe.PIPE_INHERITED arguments[0] arguments
-  return pipe_ends
+pipe-from arguments/List:
+  pipe-ends := pipe.OpenPipe false --child-process-name=arguments[0]
+  stdout := pipe-ends.fd
+  pipes := pipe.fork true pipe.PIPE-INHERITED stdout pipe.PIPE-INHERITED arguments[0] arguments
+  return pipe-ends
 
-apply_file_patch_ --patch_path/string --file_path/string:
-  patch := file.read_content patch_path
-  args := ["patch", file_path]
+apply-file-patch_ --patch-path/string --file-path/string:
+  patch := file.read-content patch-path
+  args := ["patch", file-path]
   stream := pipe.to args
   stream.out.write patch
   stream.close
 
-update_patch_ --from/string --to/string --output/string --ui/cli.Ui:
+update-patch_ --from/string --to/string --output/string --ui/cli.Ui:
   ui.print "Updating $output."
   file.delete output
   args := ["diff", "-aur", from, to]
-  stream := pipe_from args
-  out_stream := file.Stream.for_write output
-  writer := out_stream.out
+  stream := pipe-from args
+  out-stream := file.Stream.for-write output
+  writer := out-stream.out
   while chunk := stream.read:
     writer.write chunk
-  out_stream.close
+  out-stream.close
 
-ensure_main_ dir/string --toit_root/string --chip/string:
-  if file.is_directory "$dir/main": return
-  main_path := toit_main_path_for_ --chip=chip
-  copy_directory --from="$toit_root/$main_path" --to="$dir/main"
-  if file.is_file "$dir/main.patch":
-    apply_directory_patch_ --patch_path="$dir/main.patch" --directory=dir
+ensure-main_ dir/string --toit-root/string --chip/string:
+  if file.is-directory "$dir/main": return
+  main-path := toit-main-path-for_ --chip=chip
+  copy-directory --from="$toit-root/$main-path" --to="$dir/main"
+  if file.is-file "$dir/main.patch":
+    apply-directory-patch_ --patch-path="$dir/main.patch" --directory=dir
 
-ensure_partitions_ dir/string --toit_root/string --chip/string:
-  if file.is_file "$dir/partitions.csv": return
-  partition_path := toit_partition_path_for_ --chip=chip
-  copy_file --from="$toit_root/$partition_path" --to="$dir/partitions.csv"
-  if file.is_file "$dir/partitions.csv.patch":
-    apply_file_patch_ --patch_path="$dir/partitions.csv.patch" --file_path="$dir/partitions.csv"
+ensure-partitions_ dir/string --toit-root/string --chip/string:
+  if file.is-file "$dir/partitions.csv": return
+  partition-path := toit-partition-path-for_ --chip=chip
+  copy-file --from="$toit-root/$partition-path" --to="$dir/partitions.csv"
+  if file.is-file "$dir/partitions.csv.patch":
+    apply-file-patch_ --patch-path="$dir/partitions.csv.patch" --file-path="$dir/partitions.csv"
 
-ensure_sdkconfig_ dir/string --toit_root/string --chip/string --ui/cli.Ui:
-  if file.is_file "$dir/sdkconfig" or file.is_file "$dir/sdkconfig.defaults": return
+ensure-sdkconfig_ dir/string --toit-root/string --chip/string --ui/cli.Ui:
+  if file.is-file "$dir/sdkconfig" or file.is-file "$dir/sdkconfig.defaults": return
 
-  if file.is_file "$dir/sdkconfig.patch":
+  if file.is-file "$dir/sdkconfig.patch":
     ui.print "Variants should only patch sdkconfig.defaults, not sdkconfig."
     ui.abort
 
-  sdk_config_defaults_path := toit_sdk_config_defaults_path_for_ --chip=chip
+  sdk-config-defaults-path := toit-sdk-config-defaults-path-for_ --chip=chip
 
-  if file.is_file "$toit_root/$sdk_config_defaults_path":
-    copy_file --from="$toit_root/$sdk_config_defaults_path" --to="$dir/sdkconfig.defaults"
-    if file.is_file "$dir/sdkconfig.defaults.patch":
-      apply_file_patch_ --patch_path="$dir/sdkconfig.defaults.patch" --file_path="$dir/sdkconfig.defaults"
+  if file.is-file "$toit-root/$sdk-config-defaults-path":
+    copy-file --from="$toit-root/$sdk-config-defaults-path" --to="$dir/sdkconfig.defaults"
+    if file.is-file "$dir/sdkconfig.defaults.patch":
+      apply-file-patch_ --patch-path="$dir/sdkconfig.defaults.patch" --file-path="$dir/sdkconfig.defaults"
   else:
     ui.print "No sdkconfig.defaults found for chip '$chip'."
     ui.abort
 
-create_cmakelists_ dir/string --toit_root/string --sdk_path/string --chip/string --ui/cli.Ui:
-  if file.is_file "$dir/CMakeLists.txt":
+create-cmakelists_ dir/string --toit-root/string --sdk-path/string --chip/string --ui/cli.Ui:
+  if file.is-file "$dir/CMakeLists.txt":
     ui.print "CMakeLists.txt already exists."
     ui.abort
 
-  absolute_toit_root := make_absolute_slashed toit_root
-  absolute_sdk_path := make_absolute_slashed sdk_path
-  idf_component_path := "$absolute_toit_root/$TOIT_IDF_COMPONENT_PATH"
-  idf_path := "$absolute_toit_root/third_party/esp-idf"
+  absolute-toit-root := make-absolute-slashed toit-root
+  absolute-sdk-path := make-absolute-slashed sdk-path
+  idf-component-path := "$absolute-toit-root/$TOIT-IDF-COMPONENT-PATH"
+  idf-path := "$absolute-toit-root/third_party/esp-idf"
 
   // This doesn't work if the paths '"' characters.
   // Should be pretty rare.
-  file.write_content --path="$dir/CMakeLists.txt" """
+  file.write-content --path="$dir/CMakeLists.txt" """
     cmake_minimum_required(VERSION 3.5)
 
-    set(IDF_PATH "$idf_path" CACHE FILEPATH "Path to the ESP-IDF directory")
-    set(TOIT_SDK_DIR "$absolute_sdk_path" CACHE FILEPATH "Path to the Toit SDK directory")
+    set(IDF_PATH "$idf-path" CACHE FILEPATH "Path to the ESP-IDF directory")
+    set(TOIT_SDK_DIR "$absolute-sdk-path" CACHE FILEPATH "Path to the Toit SDK directory")
 
-    list(APPEND EXTRA_COMPONENT_DIRS "$idf_component_path")
+    list(APPEND EXTRA_COMPONENT_DIRS "$idf-component-path")
 
     include("\${IDF_PATH}/tools/cmake/project.cmake")
     project(toit)
@@ -303,24 +303,24 @@ create_cmakelists_ dir/string --toit_root/string --sdk_path/string --chip/string
     toit_postprocess()
     """
 
-create_makefile_ dir/string --toit_root/string --build_path/string --chip/string --ui/cli.Ui:
-  if file.is_file "$dir/Makefile": return
+create-makefile_ dir/string --toit-root/string --build-path/string --chip/string --ui/cli.Ui:
+  if file.is-file "$dir/Makefile": return
 
-  absolute_toit_root := make_absolute_slashed toit_root
-  idf_path := "$absolute_toit_root/third_party/esp-idf"
+  absolute-toit-root := make-absolute-slashed toit-root
+  idf-path := "$absolute-toit-root/third_party/esp-idf"
 
-  absolute_build_path := make_absolute_slashed build_path
+  absolute-build-path := make-absolute-slashed build-path
 
   // This doesn't work if the paths '"' characters.
   // Should be pretty rare.
-  file.write_content --path="$dir/Makefile" """
+  file.write-content --path="$dir/Makefile" """
     SHELL := bash
     .SHELLFLAGS += -e
 
-    IDF_PATH := $idf_path
+    IDF_PATH := $idf-path
     IDF_PY := \$(IDF_PATH)/tools/idf.py
-    TOIT_ROOT := $absolute_toit_root
-    BUILD_PATH := $absolute_build_path
+    TOIT_ROOT := $absolute-toit-root
+    BUILD_PATH := $absolute-build-path
 
     ifeq (\$(OS),Windows_NT)
     \tEXE_SUFFIX=.exe
@@ -346,9 +346,9 @@ create_makefile_ dir/string --toit_root/string --build_path/string --chip/string
     \tcmake -E env IDF_TARGET=$chip IDF_CCACHE_ENABLE=1 python\$(EXE_SUFFIX) "\$(IDF_PY)" -C . -B"\$(BUILD_PATH)" build
     """
 
-extract_chip_variant_ variant_path/string --ui/cli.Ui -> List:
-  slashed := variant_path.replace --all "/" "\\"
-  parts := variant_path.split "/"
+extract-chip-variant_ variant-path/string --ui/cli.Ui -> List:
+  slashed := variant-path.replace --all "/" "\\"
+  parts := variant-path.split "/"
   // For simplicity we require the variant path to have the last
   // segments be the variant name.
   // This means that we don't allow '.' as path.
@@ -359,12 +359,12 @@ extract_chip_variant_ variant_path/string --ui/cli.Ui -> List:
   variant := parts.last
   chip := variant
   if variant.contains "-":
-    chip = variant[..variant.index_of "-"]
+    chip = variant[..variant.index-of "-"]
   return [chip, variant]
 
-global_print_ str/string -> none:
+global-print_ str/string -> none:
   print str
 
 class Ui_ implements cli.Ui:
-  print str/string: global_print_ str
+  print str/string: global-print_ str
   abort: exit 1
