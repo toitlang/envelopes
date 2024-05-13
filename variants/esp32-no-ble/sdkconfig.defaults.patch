@@ -1,5 +1,5 @@
---- /home/flo/code/envelopes/../opentoit/toolchains/esp32/sdkconfig.defaults	2023-11-07 13:46:26.856085190 +0100
-+++ synthesized/esp32-no-ble/sdkconfig.defaults	2023-11-07 13:48:07.911057760 +0100
+--- toit/toolchains/esp32/sdkconfig.defaults
++++ synthesized/esp32-no-ble/sdkconfig.defaults
 @@ -9,23 +9,6 @@
  CONFIG_PARTITION_TABLE_CUSTOM=y
  CONFIG_COMPILER_OPTIMIZATION_SIZE=y

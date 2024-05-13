@@ -1,5 +1,5 @@
---- /home/flo/code/envelopes/../opentoit/toolchains/esp32s3/sdkconfig.defaults	2023-11-07 13:46:26.859418469 +0100
-+++ synthesized/esp32s3-spiram-octo/sdkconfig.defaults	2023-11-07 13:48:07.791059774 +0100
+--- toit/toolchains/esp32s3/sdkconfig.defaults
++++ synthesized/esp32s3-spiram-octo/sdkconfig.defaults
 @@ -32,6 +32,7 @@
  # CONFIG_ESP_PHY_CALIBRATION_AND_DATA_STORAGE is not set
  CONFIG_ESP_PHY_REDUCE_TX_POWER=y

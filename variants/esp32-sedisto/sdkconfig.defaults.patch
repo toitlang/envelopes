@@ -1,5 +1,5 @@
-+--- toolchains/esp32/sdkconfig.defaults        2024-02-14 13:01:21.464253095 +0100
-++++ toolchains/esp32-sedisto/sdkconfig.defaults        2024-02-14 13:02:23.710920353 +0100
+--- toit/toolchains/esp32/sdkconfig.defaults
++++ synthesized/esp32-sedisto/sdkconfig.defaults
 @@ -31,12 +31,17 @@
  # CONFIG_SPI_SLAVE_ISR_IN_IRAM is not set
  CONFIG_UART_ISR_IN_IRAM=y

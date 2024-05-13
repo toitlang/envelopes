@@ -1,5 +1,5 @@
---- toolchains/esp32/sdkconfig.defaults	2023-11-08 17:26:23.596513658 +0100
-+++ toolchains/esp32-consibio/sdkconfig.defaults	2023-11-20 17:43:10.470183258 +0100
+--- toit/toolchains/esp32/sdkconfig.defaults
++++ synthesized/esp32-consibio/sdkconfig.defaults
 @@ -5,27 +5,10 @@
  CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
  CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP=y

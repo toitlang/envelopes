@@ -1,5 +1,5 @@
---- /home/flo/code/envelopes/../opentoit/toolchains/esp32s3/sdkconfig.defaults	2023-11-07 13:46:26.859418469 +0100
-+++ synthesized/esp32s3-synap/sdkconfig.defaults	2023-11-07 13:48:07.777726664 +0100
+--- toit/toolchains/esp32s3/sdkconfig.defaults
++++ synthesized/esp32s3-synap/sdkconfig.defaults
 @@ -6,23 +6,10 @@
  CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
  CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP=y
