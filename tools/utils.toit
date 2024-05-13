@@ -52,7 +52,6 @@ to-slash-relative_ --relative-to/string path/string -> string:
     assert: not fs.is-absolute path
     throw "rooted paths are not supported: $path"
 
-
   absolute-path := fs.to-absolute path
   absolute-relative-to := fs.to-absolute relative-to
   relative-path := fs.to-relative absolute-path absolute-relative-to
