@@ -42,54 +42,6 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      # Use Go 1.20
-      - name: Switch to Go 1.20
-        shell: bash
-        run:
-          echo "$GOROOT_1_20_X64"/bin >> $GITHUB_PATH
-
-      # Get values for cache paths to be used in later steps
-      - name: Get Go paths
-        id: go-cache-paths
-        shell: bash
-        run: |
-          echo "go-build=$(go env GOCACHE)" >> $GITHUB_OUTPUT
-          echo "go-mod=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
-
-      # Cache go build cache, used to speedup go test
-      - name: Go Build Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.go-cache-paths.outputs.go-build }}
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
-          restore-keys: ${{ runner.os }}-go-build-
-
-      # Cache go mod cache, used to speedup builds
-      - name: Go Mod Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.go-cache-paths.outputs.go-mod }}
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
-          restore-keys: ${{ runner.os }}-go-mod-
-
-      - name: Ccache cache
-        uses: actions/cache@v4
-        # Store and retrieve the cache with the given sha.
-        # The 'restore-keys' prefix finds the most recent cache in case there
-        # is no match (which should almost always be the case).
-        with:
-          path: ${{ github.workspace }}/.ccache
-          key: envelope-ccache-${{ github.sha }}
-          restore-keys: envelope-ccache-
-
-      - name: Install dependencies - Linux
-        run: |
-          sudo apt-get update
-          sudo apt-get install ninja-build ccache
-          ninja --version
-          cmake --version
-          gcc --version
-
       - name: Set the git version
         run: |
           echo "TOIT_GIT_VERSION=${{ github.event.inputs.toit-version }}" >> $GITHUB_ENV
@@ -105,18 +57,21 @@ jobs:
           fi
           make TOIT_VERSION=$REF download-toit
 
+      - name: Setup build dependencies
+        uses: ./toit/actions/setup-build
+        with:
+          toit-dir: toit
+          esp32: true
+
       - name: Ccache stats before SDK build
         run: |
           ccache -s
 
+      - name: Increase ccache max size
+        run: |
+          echo "CCACHE_MAXSIZE=600M" >> $GITHUB_ENV
+
       - name: Build the host SDK
-        env:
-          IDF_CCACHE_ENABLE: 1
-          CCACHE_DIR: ${{ github.workspace }}/.ccache
-          CCACHE_BASEDIR: ${{ github.workspace }}
-          CCACHE_COMPRESS: true
-          CCACHE_COMPRESSLEVEL: '6'
-          CCACHE_MAXSIZE: 600M
         run: |
           make build-host
 
@@ -128,10 +83,6 @@ jobs:
         run: |
           build/host/sdk/bin/toit.pkg install --project-root=tools
           build/host/sdk/bin/toit.compile -o build/envelope-tool tools/main.toit
-
-      - name: Install ESP32 tools
-        run: |
-          toit/third_party/esp-idf/install.sh
 
       - name: Setting the variants
         run: |
@@ -178,13 +129,6 @@ jobs:
           ccache -s
 
       - name: Build the variants
-        env:
-          IDF_CCACHE_ENABLE: 1
-          CCACHE_DIR: ${{ github.workspace }}/.ccache
-          CCACHE_BASEDIR: ${{ github.workspace }}
-          CCACHE_COMPRESS: true
-          CCACHE_COMPRESSLEVEL: '6'
-          CCACHE_MAXSIZE: 600M
         run: |
           for variant in $VARIANTS; do
             mkdir -p build/$variant
