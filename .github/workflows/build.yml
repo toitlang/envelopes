@@ -81,8 +81,8 @@ jobs:
 
       - name: Build the envelope tool
         run: |
-          build/host/sdk/bin/toit.pkg install --project-root=tools
-          build/host/sdk/bin/toit.compile -o build/envelope-tool tools/main.toit
+          build/host/sdk/bin/toit pkg install --project-root=tools
+          build/host/sdk/bin/toit compile -o build/envelope-tool tools/main.toit
 
       - name: Setting the variants
         run: |
