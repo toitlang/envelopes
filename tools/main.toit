@@ -324,7 +324,7 @@ create-makefile_ dir/string --toit-root/string --build-path/string --chip/string
 
   makefile-build-path := to-makefile-path --relative-to=dir build-path
 
-  // This doesn't work if the paths '"' characters.
+  // This doesn't work if the paths contain '"' characters.
   // Should be pretty rare.
   file.write-content --path="$dir/Makefile" """
     SOURCE_DIR := \$(dir \$(realpath \$(lastword \$(MAKEFILE_LIST))))
