@@ -319,14 +319,16 @@ create-makefile_ dir/string --toit-root/string --build-path/string --chip/string
   makefile-toit-root := to-makefile-path --relative-to=dir toit-root
   idf-path := "$makefile-toit-root/third_party/esp-idf"
   if not fs.is-absolute idf-path:
-    // Use the Makefile $PWD to make the path absolute.
-    idf-path = "\$(PWD)/$idf-path"
+    // Use the Makefile-path to make the path absolute.
+    idf-path = "\$(SOURCE_DIR)/$idf-path"
 
   makefile-build-path := to-makefile-path --relative-to=dir build-path
 
-  // This doesn't work if the paths '"' characters.
+  // This doesn't work if the paths contain '"' characters.
   // Should be pretty rare.
   file.write-content --path="$dir/Makefile" """
+    SOURCE_DIR := \$(dir \$(realpath \$(lastword \$(MAKEFILE_LIST))))
+
     SHELL := bash
     .SHELLFLAGS += -e
 
