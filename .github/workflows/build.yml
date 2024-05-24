@@ -8,6 +8,21 @@ name: Build
 on:
   workflow_dispatch:
     inputs:
+      build-esp32:
+        description: Build for ESP32
+        required: false
+        type: boolean
+        default: true
+      build-host:
+        description: Build for host
+        required: false
+        type: boolean
+        default: true
+      build-cross:
+        description: Build for cross
+        required: false
+        type: boolean
+        default: true
       toit-version:
         description: Toit SDK version to check out
         required: true
@@ -31,9 +46,15 @@ on:
         required: false
         type: string
 
+env:
+  # Toit currently supports the following architectures.
+  # See Toit's Makefile and search for 'TOITLANG_SYSROOTS'.
+  CROSS_ARCHS: aarch64 arm-linux-gnueabi armv7 raspbian
+
 jobs:
-  build:
-    name: "Build for SDK ${{ github.event.inputs.toit-version }}"
+  build-esp32:
+    name: "Build ESP32 - ${{ github.event.inputs.toit-version }}"
+    if: ${{ github.event.inputs.build-esp32 == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -190,3 +211,150 @@ jobs:
           if [ "$build_failed" = true ]; then
             exit 1
           fi
+
+  build-host:
+    if: ${{ github.event.inputs.build-host == 'true' }}
+
+    strategy:
+      matrix:
+        # ubuntu-20.04 so that we don't depend on a recent glibc.
+        # macos-13, since it's still intel based.
+        container: [ ubuntu-20.04, macos-13, windows-latest ]
+
+    name: "Build ${{ matrix.container }} - ${{ github.event.inputs.toit-version }}"
+    runs-on: ${{ matrix.container }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set the git version
+        run: |
+          echo "TOIT_GIT_VERSION=${{ github.event.inputs.toit-version }}" >> $GITHUB_ENV
+
+      - name: Fetch the Toit repository
+        shell: bash
+        run: |
+          # We allow the workflow dispatch to override the checked out branch.
+          # Note that we set the TOIT_GIT_VERSION env variable. The checked out branch
+          # thus doesn't influence the version of the SDK we build.
+          REF=${{ github.event.inputs.branch }}
+          if [[ -z "$REF" ]]; then
+            REF=${{ github.event.inputs.toit-version }}
+          fi
+          make TOIT_VERSION=$REF download-toit
+
+      - name: Setup build dependencies
+        uses: ./toit/actions/setup-build
+        with:
+          toit-dir: toit
+          cache-key-prefix: "cache-host"
+
+      - name: Build the host envelopes
+        shell: bash
+        run: |
+          make build-host
+
+      - name: Prepare envelopes for upload
+        shell: bash
+        run: |
+          if [[ ${{ runner.os }} == 'Windows' ]]; then
+            variant="amd64-windows"
+          elif [[ ${{ runner.os }} == 'macOS' ]]; then
+            variant="amd64-macos"
+          else
+            variant="amd64-linux"
+          fi
+          mkdir envelopes
+          cp build/host/firmware.envelope envelopes/firmware-$variant.envelope
+          gzip -9 envelopes/firmware-$variant.envelope
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-host-${{ runner.os }}
+          path: |
+            envelopes
+
+      - name: Release
+        if: ${{ github.event.inputs.upload-release == 'true' }}
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            envelopes/*
+          body: |
+            Envelopes for Toit SDK ${{ github.event.inputs.toit-version }}
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.event.inputs.toit-version }}
+          commit: main
+
+  build-cross:
+    name: "Build cross - ${{ github.event.inputs.toit-version }}"
+    if: ${{ github.event.inputs.build-cross == 'true' }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set the git version
+        run: |
+          echo "TOIT_GIT_VERSION=${{ github.event.inputs.toit-version }}" >> $GITHUB_ENV
+
+      - name: Fetch the Toit repository
+        run: |
+          # We allow the workflow dispatch to override the checked out branch.
+          # Note that we set the TOIT_GIT_VERSION env variable. The checked out branch
+          # thus doesn't influence the version of the SDK we build.
+          REF=${{ github.event.inputs.branch }}
+          if [[ -z "$REF" ]]; then
+            REF=${{ github.event.inputs.toit-version }}
+          fi
+          make TOIT_VERSION=$REF download-toit
+
+      - name: Setup build dependencies
+        uses: ./toit/actions/setup-build
+        with:
+          toit-dir: toit
+          cache-key-prefix: "cache-cross"
+
+      - name: Build the cross envelopes
+        run: |
+          cd toit
+          for arch in $CROSS_ARCHS; do
+            make TARGET=$arch sdk
+          done
+
+      - name: Prepare envelopes for upload
+        run: |
+          mkdir envelopes
+          for arch in $CROSS_ARCHS; do
+            variant_arch=$arch
+            if [[ "$arch" == "arm-linux-gnueabi" ]]; then
+              variant_arch="arm-gnueabi"
+            elif [[ "$arch" == "raspbian" ]]; then
+              variant_arch="arm"
+            fi
+            cp toit/build/$arch/firmware.envelope envelopes/firmware-$variant_arch-linux.envelope
+            gzip -9 envelopes/firmware-$variant_arch-linux.envelope
+          done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-cross
+          path: |
+            envelopes
+
+      - name: Release
+        if: ${{ github.event.inputs.upload-release == 'true' }}
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            envelopes/*
+          body: |
+            Envelopes for Toit SDK ${{ github.event.inputs.toit-version }}
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.event.inputs.toit-version }}
+          commit: main
