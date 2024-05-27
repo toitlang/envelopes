@@ -258,11 +258,11 @@ jobs:
         shell: bash
         run: |
           if [[ ${{ runner.os }} == 'Windows' ]]; then
-            variant="amd64-windows"
+            variant="x64-windows"
           elif [[ ${{ runner.os }} == 'macOS' ]]; then
-            variant="amd64-macos"
+            variant="x64-macos"
           else
-            variant="amd64-linux"
+            variant="x64-linux"
           fi
           mkdir envelopes
           cp build/host/firmware.envelope envelopes/firmware-$variant.envelope
