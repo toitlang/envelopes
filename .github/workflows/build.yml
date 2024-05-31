@@ -219,9 +219,14 @@ jobs:
       matrix:
         # ubuntu-20.04 so that we don't depend on a recent glibc.
         # macos-13, since it's still intel based.
-        container: [ ubuntu-20.04, macos-13, windows-latest ]
+        container: [ ubuntu-20.04, macos-13, macos-latest, windows-latest ]
+        architecture: [ x64 ]
 
-    name: "Build ${{ matrix.container }} - ${{ github.event.inputs.toit-version }}"
+        include:
+          - container: ubuntu-20.04
+            architecture: x86
+
+    name: "Build ${{ matrix.container }} - ${{ matrix.architecture }} - ${{ github.event.inputs.toit-version }}"
     runs-on: ${{ matrix.container }}
 
     steps:
@@ -252,26 +257,36 @@ jobs:
       - name: Build the host envelopes
         shell: bash
         run: |
-          make build-host
+          if [[ ${{ matrix.architecture }} == 'x86' ]]; then
+            TARGET=host32;
+          else
+            TARGET=host;
+          fi
+          echo "HOST_TARGET=$TARGET" >> $GITHUB_ENV
+          make -C toit TARGET=$TARGET BUILD=$PWD/build build-envelope
 
       - name: Prepare envelopes for upload
         shell: bash
         run: |
           if [[ ${{ runner.os }} == 'Windows' ]]; then
-            variant="x64-windows"
+            variant="${{ matrix.architecture }}-windows"
           elif [[ ${{ runner.os }} == 'macOS' ]]; then
-            variant="x64-macos"
+            if [[ ${{ matrix.container }} == 'macos-13' ]]; then
+              variant="x64-macos"
+            else
+              variant="aarch64-macos"
+            fi
           else
-            variant="x64-linux"
+            variant="${{ matrix.architecture }}-linux"
           fi
           mkdir envelopes
-          cp build/host/firmware.envelope envelopes/firmware-$variant.envelope
+          cp build/$HOST_TARGET/firmware.envelope envelopes/firmware-$variant.envelope
           gzip -9 envelopes/firmware-$variant.envelope
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts-host-${{ runner.os }}
+          name: artifacts-host-${{ matrix.architecture }}-${{ matrix.container }}
           path: |
             envelopes
 
