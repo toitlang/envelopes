@@ -28,6 +28,10 @@ It is built for maximum compatibility.
 
 This variant supports Ethernet, but without the clock output.
 
+### esp32-spiram
+
+An ESP32 variant for boards with SPIRAM. Otherwise the same as the ESP32 variant.
+
 ### esp32-eth-clk-out0 and esp32-eth-clk-out17
 
 A variant for ESP32 boards with Ethernet and a clock output on pin 0/17.
@@ -98,7 +102,17 @@ For example, to create a variant `esp32s3-foo`.
   `cp -r toolchains/esp32s3 toolchains/esp32s3-foo`.
 * Run `make IDF_TARGET=esp32s3 ESP32_CHIP=esp32s3-foo menuconfig` and make the changes you want.
   This automatically updates the `sdkconfig.defaults` as well.
-* Create patch by running `diff -u toolchains/esp32s3/sdkconfig.defaults toolchains/esp32s3-foo/sdkconfig.defaults > toolchains/esp32s3-foo/sdkconfig.defaults.patch`.
+* Create patch by running:
+  ```
+  diff -aur \
+    --label toit/toolchains/esp32s3/sdkconfig.defaults \
+    --label synthesized/esp32s3-foo/sdkconfig.defaults \
+    toolchains/esp32s3/sdkconfig.defaults \
+    toolchains/esp32s3-foo/sdkconfig.defaults \
+    > toolchains/esp32s3-foo/sdkconfig.defaults.patch
+  ```
+  The labels are not crucial, but make it easier for us to update the
+  patch at a later time.
 * Create a new variant in this (`envelopes`) repository and copy the patch file into it.
 
 #### Main changes
