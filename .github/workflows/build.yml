@@ -283,7 +283,7 @@ jobs:
           mkdir snapshots
           cp build/$HOST_TARGET/firmware.envelope envelopes/firmware-$variant.envelope
           gzip -9 envelopes/firmware-$variant.envelope
-          cp build/$HOST_TARGET/generated/run-image.snapshot snapshots/run-image-$variant.snapshot
+          cp build/$HOST_TARGET/generated/run_image.snapshot snapshots/run-image-$variant.snapshot
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
