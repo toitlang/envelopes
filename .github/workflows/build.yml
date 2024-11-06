@@ -23,6 +23,11 @@ on:
         required: false
         type: boolean
         default: true
+      build-tables:
+        description: Build partition tables
+        required: false
+        type: boolean
+        default: true
       toit-version:
         description: Toit SDK version to check out
         required: true
@@ -192,7 +197,7 @@ jobs:
           artifacts: |
             envelopes/*
           body: |
-            Envelopes for Toit SDK ${{ github.event.inputs.toit-version }}
+            Envelopes and partition tables for Toit SDK ${{ github.event.inputs.toit-version }}
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.event.inputs.toit-version }}
@@ -300,7 +305,7 @@ jobs:
           artifacts: |
             envelopes/*
           body: |
-            Envelopes for Toit SDK ${{ github.event.inputs.toit-version }}
+            Envelopes and partition tables for Toit SDK ${{ github.event.inputs.toit-version }}
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.event.inputs.toit-version }}
@@ -371,7 +376,44 @@ jobs:
           artifacts: |
             envelopes/*
           body: |
-            Envelopes for Toit SDK ${{ github.event.inputs.toit-version }}
+            Envelopes and partition tables for Toit SDK ${{ github.event.inputs.toit-version }}
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.event.inputs.toit-version }}
+          commit: main
+
+  release-partition-tables:
+    name: "Release partition tables - ${{ github.event.inputs.toit-version }}"
+    if: ${{ github.event.inputs.build-tables == 'true' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Show inputs
+        run: echo "${{ toJSON(github.event.inputs) }}"
+
+      - uses: actions/checkout@v4
+
+      - name: Set the git version
+        run: |
+          echo "TOIT_GIT_VERSION=${{ github.event.inputs.toit-version }}" >> $GITHUB_ENV
+
+      - name: Prepare partition tables
+        run: |
+          mkdir -p build
+          for variant in $(ls partition-tables); do
+            if [ -e "partition-tables/$variant/partitions.csv" ]; then
+              cp "partition-tables/$variant/partitions.csv" "build/partition-table-$variant.csv"
+            fi
+          done
+
+      - name: Release
+        if: ${{ github.event.inputs.upload-release == 'true' }}
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            build/*
+          body: |
+            Envelopes and partition tables for Toit SDK ${{ github.event.inputs.toit-version }}
           allowUpdates: true
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.event.inputs.toit-version }}
