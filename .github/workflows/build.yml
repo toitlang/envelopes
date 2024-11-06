@@ -398,11 +398,14 @@ jobs:
           echo "TOIT_GIT_VERSION=${{ github.event.inputs.toit-version }}" >> $GITHUB_ENV
 
       - name: Prepare partition tables
+        shell: bash
         run: |
           mkdir -p build
-          for variant in $(ls partition-tables); do
+          shopt -s nullglob
+          for csv_file in partition-tables/*/partitions.csv; do
+            variant=$(basename $(dirname $csv_file))
             if [ -e "partition-tables/$variant/partitions.csv" ]; then
-              cp "partition-tables/$variant/partitions.csv" "build/partition-table-$variant.csv"
+              cp "$csv_file" "build/partition-table-$variant.csv"
             fi
           done
 
