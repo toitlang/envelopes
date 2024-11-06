@@ -403,7 +403,7 @@ jobs:
           mkdir -p build
           shopt -s nullglob
           for csv_file in partition-tables/*/partitions.csv; do
-            variant=$(basename $(dirname $csv_file))
+            variant=$(basename "$(dirname "$csv_file")")
             if [ -e "partition-tables/$variant/partitions.csv" ]; then
               cp "$csv_file" "build/partition-table-$variant.csv"
             fi
