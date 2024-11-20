@@ -414,7 +414,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: |
-            build/partition-table-*.csv
+            build/partitions-*.csv
           body: |
             Envelopes and partition tables for Toit SDK ${{ github.event.inputs.toit-version }}
           allowUpdates: true
