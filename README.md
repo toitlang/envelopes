@@ -23,6 +23,6 @@ See the [variants/README.md](variants/README.md) for a list of the
 most commonly used variants. You can also browse the `variants`
 directory for more variants.
 
-See the [partition-tables/README.md](partition-tables/README.md) for
+See the [partitions/esp32/README.md](partitions/esp32/README.md) for
 a list of the most commonly used partition tables. You can also browse
-the `partition-tables` directory for more partition tables.
+the `partitions/esp32` directory for more partition tables.
