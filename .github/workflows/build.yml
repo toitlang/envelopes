@@ -112,7 +112,7 @@ jobs:
 
       - name: Setting the variants
         run: |
-          VARIANTS=${{ github.event.inputs.variant }}
+          VARIANTS="${{ github.event.inputs.variant }}"
           if [ -z "$VARIANTS" ]; then
             if ! [ -z "${{ github.event.inputs.gist }}" ]; then
               VARIANTS="gist"
