@@ -1,12 +1,5 @@
 --- toit/toolchains/esp32/sdkconfig.defaults
 +++ synthesized/esp32-no-ble/sdkconfig.defaults
-@@ -1,5 +1,5 @@
- # This file was generated using idf.py save-defconfig. It can be edited manually.
--# Espressif IoT Development Framework (ESP-IDF) 5.3.1 Project Minimal Configuration
-+# Espressif IoT Development Framework (ESP-IDF)  Project Minimal Configuration
- #
- CONFIG_BOOTLOADER_LOG_LEVEL_NONE=y
- CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
 @@ -9,34 +9,20 @@
  CONFIG_PARTITION_TABLE_CUSTOM=y
  CONFIG_COMPILER_OPTIMIZATION_SIZE=y
