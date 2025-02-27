@@ -25,23 +25,28 @@ For `sdkconfig` changes, a patch to the original `sdkconfig.defaults`
 file is typically preferred.
 
 For example, to create a variant `esp32s3-foo`.
-* Check out Toit (or use an existing checkout).
-* Copy the existing `toolchains/esp32s3` directory to `toolchains/esp32s3-foo`:
-  `cp -r toolchains/esp32s3 toolchains/esp32s3-foo`.
-* Run `make IDF_TARGET=esp32s3 ESP32_CHIP=esp32s3-foo menuconfig` and make the changes you want.
+* Create the following environment variables: `BASE=esp32s3` and
+  `VARIANT=esp32s3-foo`. (Adjust for your base and variant).
+* Create the new variant directory: `mkdir -p variants/$VARIANT`.
+* Check out Toit (or use an existing checkout) as `toit` in the root of
+  this repository. Symbolic links are fine.
+* Move into the `toit` directory: `cd toit`.
+* Copy the existing `toolchains/$BASE` directory to `toolchains/$VARIANT`:
+  `cp -r toolchains/$BASE toolchains/$VARIANT`.
+* Run `make IDF_TARGET=$BASE ESP32_CHIP=$VARIANT menuconfig` and make the changes you want.
   This automatically updates the `sdkconfig.defaults` as well.
+* Move back to the root of the repository: `cd ..`.
 * Create patch by running:
   ```
   diff -aur \
-    --label toit/toolchains/esp32s3/sdkconfig.defaults \
-    --label synthesized/esp32s3-foo/sdkconfig.defaults \
-    toolchains/esp32s3/sdkconfig.defaults \
-    toolchains/esp32s3-foo/sdkconfig.defaults \
-    > toolchains/esp32s3-foo/sdkconfig.defaults.patch
+    --label toit/toolchains/$BASE/sdkconfig.defaults \
+    --label synthesized/$VARIANT/sdkconfig.defaults \
+    toolchains/$BASE/sdkconfig.defaults \
+    toolchains/$VARIANT/sdkconfig.defaults \
+    > variant/$VARIANT/sdkconfig.defaults.patch
   ```
   The labels are not crucial, but make it easier for us to update the
   patch at a later time.
-* Create a new variant in this (`envelopes`) repository and copy the patch file into it.
 
 ### Main changes
 
