@@ -1,7 +1,7 @@
 --- toit/toolchains/esp32/sdkconfig.defaults
 +++ synthesized/esp32-eth-clk-out0-spiram/sdkconfig.defaults
 @@ -31,12 +31,17 @@
- CONFIG_ESP_ERR_TO_NAME_LOOKUP=n
+ CONFIG_I2S_ISR_IRAM_SAFE=y
  CONFIG_SPI_SLAVE_ISR_IN_IRAM=n
  CONFIG_UART_ISR_IN_IRAM=y
 +CONFIG_ETH_RMII_CLK_OUTPUT=y
