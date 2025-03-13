@@ -13,3 +13,9 @@ A partition table that sets the size of the OTA partitions
 to 0x1C0000 (1835008) bytes. This table is typically used for
 use-cases where programs are bundled with the firmware (like with
 [Artemis](https://github.com/toitware/artemis)).
+
+## OTA-1D0000
+
+A partition table that sets the size of the OTA partitions
+to 0x1D0000 (1900544) bytes. This table reserves even more space for
+the OTA partitions.
