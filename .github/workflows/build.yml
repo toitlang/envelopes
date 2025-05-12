@@ -222,13 +222,13 @@ jobs:
 
     strategy:
       matrix:
-        # ubuntu-20.04 so that we don't depend on a recent glibc.
+        # ubuntu-22.04 so that we don't depend on a too recent glibc.
         # macos-13, since it's still intel based.
-        container: [ ubuntu-20.04, macos-13, macos-latest, windows-latest ]
+        container: [ ubuntu-22.04, macos-13, macos-latest, windows-latest ]
         architecture: [ x64 ]
 
         include:
-          - container: ubuntu-20.04
+          - container: ubuntu-22.04
             architecture: x86
 
     name: "Build ${{ matrix.container }} - ${{ matrix.architecture }} - ${{ github.event.inputs.toit-version }}"
