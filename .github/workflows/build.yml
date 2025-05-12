@@ -54,7 +54,7 @@ on:
 env:
   # Toit currently supports the following architectures.
   # See Toit's Makefile and search for 'TOITLANG_SYSROOTS'.
-  CROSS_ARCHS: aarch64 arm-linux-gnueabi armv7 raspbian
+  CROSS_ARCHS: aarch64 arm-linux-gnueabi armv7 raspbian riscv64
 
 jobs:
   build-esp32:
