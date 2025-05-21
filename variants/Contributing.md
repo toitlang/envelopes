@@ -41,9 +41,9 @@ For example, to create a variant `esp32s3-foo`.
   diff -aur \
     --label toit/toolchains/$BASE/sdkconfig.defaults \
     --label synthesized/$VARIANT/sdkconfig.defaults \
-    toolchains/$BASE/sdkconfig.defaults \
-    toolchains/$VARIANT/sdkconfig.defaults \
-    > variant/$VARIANT/sdkconfig.defaults.patch
+    toit/toolchains/$BASE/sdkconfig.defaults \
+    toit/toolchains/$VARIANT/sdkconfig.defaults \
+    > variants/$VARIANT/sdkconfig.defaults.patch
   ```
   The labels are not crucial, but make it easier for us to update the
   patch at a later time.
