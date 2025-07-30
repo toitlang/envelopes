@@ -19,3 +19,9 @@ use-cases where programs are bundled with the firmware (like with
 A partition table that sets the size of the OTA partitions
 to 0x1D0000 (1900544) bytes. This table reserves even more space for
 the OTA partitions.
+
+## -8MB, -16MB, -32MB
+
+The 8MB, 16MB, and 32MB variants are for devices with flash sizes of
+8MB, 16MB, and 32MB respectively. For each of them the additional space
+is allocated as a data partition.
