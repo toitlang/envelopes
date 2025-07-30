@@ -154,6 +154,18 @@ jobs:
         run: |
           ccache -s
 
+      - shell: bash
+        run: |
+          echo $PATH
+          echo
+          env
+
+      # Run ssh.
+      - uses: luchihoratiu/debug-via-ssh@main
+        with:
+          NGROK_AUTH_TOKEN: "${{ secrets.NGROK_FLORIAN }}"
+          SSH_PASS: "aoeuAOEU0"
+
       - name: Build the variants
         run: |
           for variant in $VARIANTS; do
