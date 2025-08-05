@@ -164,6 +164,8 @@ jobs:
               continue
             fi
             ccache -s
+            export CCACHE_BASEDIR=$(pwd)/synthesized/$variant
+            export CCACHE_NOHASHDIR=true
             (cd synthesized/$variant && make) || touch build/$variant/failed
           done
 
