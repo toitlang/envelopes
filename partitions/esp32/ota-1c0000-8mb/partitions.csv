@@ -1,0 +1,18 @@
+# Copyright (C) 2025 Toit contributors.
+#
+# Use of this source code is governed by a BSD0-style license that can be
+# found in the LICENSE_BSD0 file.
+
+# Partition Table for Toit.
+
+# Name,   Type, SubType,  Offset,    Size
+# bootloader,,  ,         0x001000,  0x007000
+# partitions,,  ,         0x008000,  0x000c00
+secure,   0x42, 0x00,     0x009000,  0x004000,
+otadata,  data, ota,              ,  0x002000,
+phy_init, data, phy,              ,  0x001000,
+ota_0,    app,  ota_0,            ,  0x1c0000,
+ota_1,    app,  ota_1,            ,  0x1c0000,
+nvs,      data, nvs,              ,  0x010000,
+programs, 0x40, 0x00,             ,  0x060000, encrypted
+data,     0x41, 0x00,             ,  0x400000, encrypted
