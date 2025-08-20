@@ -17,11 +17,11 @@ make build-host
 This will checkout the Toit repository into a `toit` directory and
 build the host SDK into `build/host/sdk`.
 
-The `toit.run` and `toit.pkg` are then in `build/host/sdk/bin`.
+The `toit` executable is then in `build/host/sdk/bin`.
 
 In the remainder of this document, we assume that you have added
-`build/host/sdk/bin` to your `PATH`. If not, just replace `toit.run`
-and `toit.pkg` with the full path to the binaries.
+`build/host/sdk/bin` to your `PATH`. If not, just replace `toit`
+with the full path to the binary.
 
 ## The envelope tool
 
@@ -31,10 +31,10 @@ variant.
 
 Make sure to install its packages first:
 ```
-toit.pkg install --project-root=tools
+toit pkg install --project-root=tools
 ```
 
-Run it with `toit.run tools/main.toit`.
+Run it with `toit tools/main.toit`.
 
 ### Synthesizing a variant
 
@@ -58,7 +58,7 @@ It requires a few arguments:
 
 For example:
 ```
-toit.run tools/main.toit synthesize \
+toit run tools/main.toit -- synthesize \
 			--toit-root=toit \
 			--build-root=build \
 			--output-root=synthesized \

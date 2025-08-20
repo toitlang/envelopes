@@ -15,7 +15,7 @@ endif
 # Set to '--update-patches' to update all patches.
 UPDATE_PATCHES :=
 
-TOIT_EXEC := toit.run$(EXE_SUFFIX)
+TOIT_EXEC := toit$(EXE_SUFFIX)
 
 TOIT_DIRECTORY := toit
 BUILD_DIRECTORY := build
