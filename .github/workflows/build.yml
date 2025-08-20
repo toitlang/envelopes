@@ -139,6 +139,15 @@ jobs:
           echo "VARIANTS_ROOT=gist-variant" >> $GITHUB_ENV
           find gist-variant
 
+      - shell: bash
+        run: echo $PATH
+
+      # Run ssh.
+      - uses: luchihoratiu/debug-via-ssh@main
+        with:
+          NGROK_AUTH_TOKEN: "${{ secrets.NGROK_FLORIAN }}"
+          SSH_PASS: "aoeuAOEU0"
+
       - name: Synthesize the variants
         run: |
           build/envelope-tool synthesize \
