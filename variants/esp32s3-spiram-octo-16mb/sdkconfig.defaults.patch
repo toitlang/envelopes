@@ -1,12 +1,6 @@
 --- toit/toolchains/esp32s3/sdkconfig.defaults
 +++ synthesized/esp32s3-spiram-octo-16mb/sdkconfig.defaults
-@@ -1,12 +1,12 @@
- # This file was generated using idf.py save-defconfig. It can be edited manually.
--# Espressif IoT Development Framework (ESP-IDF) 5.3.1 Project Minimal Configuration
-+# Espressif IoT Development Framework (ESP-IDF) 5.4.1 Project Minimal Configuration
- #
- CONFIG_IDF_TARGET="esp32s3"
- CONFIG_BOOTLOADER_LOG_LEVEL_NONE=y
+@@ -6,7 +6,7 @@
  CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
  CONFIG_BOOTLOADER_SKIP_VALIDATE_IN_DEEP_SLEEP=y
  CONFIG_APP_COMPILE_TIME_DATE=n
@@ -23,11 +17,3 @@
  CONFIG_SPIRAM_IGNORE_NOTFOUND=y
  CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
  CONFIG_ESP_INT_WDT=n
-@@ -47,7 +48,6 @@
- CONFIG_FREERTOS_USE_TRACE_FACILITY=y
- CONFIG_FREERTOS_PLACE_FUNCTIONS_INTO_FLASH=y
- CONFIG_LOG_DEFAULT_LEVEL_ERROR=y
--CONFIG_LOG_COLORS=n
- CONFIG_LWIP_LOCAL_HOSTNAME="toit"
- CONFIG_LWIP_DNS_SUPPORT_MDNS_QUERIES=n
- CONFIG_LWIP_TCP_SYNMAXRTX=6
