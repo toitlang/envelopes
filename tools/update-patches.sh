@@ -22,17 +22,17 @@ source third_party/esp-idf/export.sh
 
 cd $CURRENT_DIR
 cd synthesized
+VARIANTS=$(ls -d esp32*)
+cd $CURRENT_DIR
 
-for d in *; do
-  if [[ -e ../variants/$d/sdkconfig.defaults.patch ]]; then
-    idf.py -C $d -B $d/build save-defconfig
+for d in $VARIANTS; do
+  if [[ -e variants/$d/sdkconfig.defaults.patch ]]; then
+    export IDF_TARGET=$(echo $d | cut -d'-' -f1)
+    idf.py -C synthesized/$d -B synthesized/$d/build save-defconfig
     # The base is everything of $d until the first '-'.
-    BASE=$(echo $d | cut -d'-' -f1)
     diff -aur \
-        --label toit/toolchains/$BASE/sdkconfig.defaults \
-        --label synthesized/$d/sdkconfig.defaults \
-        $BASE/sdkconfig.defaults \
-        $d/sdkconfig.defaults \
-        > ../variants/$d/sdkconfig.defaults.patch
+        toit/toolchains/$IDF_TARGET/sdkconfig.defaults \
+        synthesized/$d/sdkconfig.defaults \
+        > variants/$d/sdkconfig.defaults.patch
   fi;
 done
