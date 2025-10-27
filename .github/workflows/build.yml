@@ -186,7 +186,7 @@ jobs:
           done
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: artifacts
           path: |
@@ -293,7 +293,7 @@ jobs:
           cp build/$HOST_TARGET/generated/run_image.snapshot snapshots/run-image-$variant.snapshot
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: artifacts-host-${{ matrix.architecture }}-${{ matrix.container }}
           path: |
@@ -365,7 +365,7 @@ jobs:
           done
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: artifacts-cross
           path: |
