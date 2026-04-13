@@ -292,7 +292,7 @@ jobs:
               echo "Expected universal binary, got: $archs"
               exit 1
             fi
-            for alias in aarch64-macos x86-macos; do
+            for alias in aarch64-macos x64-macos; do
               cp envelopes/firmware-$variant.envelope.gz envelopes/firmware-$alias.envelope.gz
               cp snapshots/run-image-$variant.snapshot snapshots/run-image-$alias.snapshot
             done
