@@ -66,7 +66,7 @@ jobs:
       - name: Show inputs
         run: echo "${{ toJSON(github.event.inputs) }}"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set the git version
         run: |
@@ -156,17 +156,47 @@ jobs:
 
       - name: Build the variants
         run: |
+          # Build all same-chip variants through a canonical source+build
+          # directory so that ccache sees identical paths and can share
+          # compilation results across variants.
+          declare -A CHIP_VARIANTS
           for variant in $VARIANTS; do
-            mkdir -p build/$variant
             if [ -e synthesized/$variant/failed ]; then
-              echo "Skipping $variant to due failed synthesis."
+              echo "Skipping $variant due to failed synthesis."
+              mkdir -p build/$variant
               touch build/$variant/failed
               continue
             fi
-            ccache -s
-            export CCACHE_BASEDIR=$(pwd)/synthesized/$variant
-            export CCACHE_NOHASHDIR=true
-            (cd synthesized/$variant && make) || touch build/$variant/failed
+            chip=$(grep -oP 'IDF_TARGET=\K[a-z0-9]+' synthesized/$variant/Makefile)
+            CHIP_VARIANTS[$chip]+="$variant "
+          done
+
+          export CCACHE_BASEDIR=$(pwd)
+          export CCACHE_NOHASHDIR=true
+          export CCACHE_SLOPPINESS=include_file_mtime,include_file_ctime,time_macros
+
+          for chip in "${!CHIP_VARIANTS[@]}"; do
+            canonical_src="synthesized/_build_${chip}"
+            canonical_build="build/_build_${chip}"
+
+            for variant in ${CHIP_VARIANTS[$chip]}; do
+              mkdir -p build/$variant
+
+              # Start clean: copy variant into canonical directory.
+              rm -rf "$canonical_src" "$canonical_build"
+              cp -a "synthesized/$variant" "$canonical_src"
+              sed -i "s|BUILD_PATH := .*|BUILD_PATH := ../../${canonical_build}|" \
+                  "$canonical_src/Makefile"
+
+              ccache -s
+              (cd "$canonical_src" && make) || touch build/$variant/failed
+
+              if [ ! -f "build/$variant/failed" ]; then
+                cp "$canonical_build/firmware.envelope" "build/$variant/firmware.envelope" 2>/dev/null || true
+              fi
+            done
+
+            rm -rf "$canonical_src" "$canonical_build"
           done
 
       - name: Ccache stats after variants build
@@ -236,7 +266,7 @@ jobs:
     runs-on: ${{ matrix.container }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set the git version
         run: |
@@ -326,7 +356,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set the git version
         run: |
@@ -399,7 +429,7 @@ jobs:
       - name: Show inputs
         run: echo "${{ toJSON(github.event.inputs) }}"
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set the git version
         run: |

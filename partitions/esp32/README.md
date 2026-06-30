@@ -20,6 +20,16 @@ A partition table that sets the size of the OTA partitions
 to 0x1D0000 (1900544) bytes. This table reserves even more space for
 the OTA partitions.
 
+## OTA-200000, OTA-300000, OTA-400000
+
+Partition tables with larger OTA partitions, for firmware images that bundle
+large assets (assets are stored inside the OTA partition together with the
+firmware). They set the OTA partitions to 0x200000 (2MB), 0x300000 (3MB) and
+0x400000 (4MB) respectively.
+
+Because there are two OTA partitions, these already occupy 4MB, 6MB and 8MB
+respectively, so they are only provided for 16MB (and larger) flash sizes.
+
 ## -8MB, -16MB, -32MB
 
 The 8MB, 16MB, and 32MB variants are for devices with flash sizes of
