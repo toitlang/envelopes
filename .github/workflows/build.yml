@@ -317,7 +317,7 @@ jobs:
           gzip -9 envelopes/firmware-$variant.envelope
           cp build/$HOST_TARGET/generated/run_image.snapshot snapshots/run-image-$variant.snapshot
           if [[ $variant == 'universal-macos' ]]; then
-            archs=$(lipo -archs toit/build/$HOST_TARGET/run_image/toit_run_image)
+            archs=$(lipo -archs build/$HOST_TARGET/run_image/toit_run_image)
             if [[ "$archs" != *"arm64"* ]] || [[ "$archs" != *"x86_64"* ]]; then
               echo "Expected universal binary, got: $archs"
               exit 1
