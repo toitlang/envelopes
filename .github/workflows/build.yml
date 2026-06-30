@@ -255,8 +255,7 @@ jobs:
     strategy:
       matrix:
         # ubuntu-22.04 so that we don't depend on a too recent glibc.
-        # macos-13, since it's still intel based.
-        container: [ ubuntu-22.04, macos-13, macos-latest, windows-latest ]
+        container: [ ubuntu-22.04, macos-latest, windows-latest ]
         architecture: [ x64 ]
 
         include:
@@ -308,11 +307,7 @@ jobs:
           if [[ ${{ runner.os }} == 'Windows' ]]; then
             variant="${{ matrix.architecture }}-windows"
           elif [[ ${{ runner.os }} == 'macOS' ]]; then
-            if [[ ${{ matrix.container }} == 'macos-13' ]]; then
-              variant="x64-macos"
-            else
-              variant="aarch64-macos"
-            fi
+            variant="universal-macos"
           else
             variant="${{ matrix.architecture }}-linux"
           fi
@@ -321,6 +316,17 @@ jobs:
           cp build/$HOST_TARGET/firmware.envelope envelopes/firmware-$variant.envelope
           gzip -9 envelopes/firmware-$variant.envelope
           cp build/$HOST_TARGET/generated/run_image.snapshot snapshots/run-image-$variant.snapshot
+          if [[ $variant == 'universal-macos' ]]; then
+            archs=$(lipo -archs build/$HOST_TARGET/run_image/toit_run_image)
+            if [[ "$archs" != *"arm64"* ]] || [[ "$archs" != *"x86_64"* ]]; then
+              echo "Expected universal binary, got: $archs"
+              exit 1
+            fi
+            for alias in aarch64-macos x64-macos; do
+              cp envelopes/firmware-$variant.envelope.gz envelopes/firmware-$alias.envelope.gz
+              cp snapshots/run-image-$variant.snapshot snapshots/run-image-$alias.snapshot
+            done
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
