@@ -17,6 +17,13 @@ This variant supports Ethernet, but without the clock output.
 
 An ESP32 variant for boards with SPIRAM. Otherwise the same as the ESP32 variant.
 
+## esp32-spiram-rev3
+
+Like `esp32-spiram`, but only for ESP32 chips of revision v3.0 (ECO3) or
+newer. On those chips the SPI RAM cache workaround is not needed, which
+frees enough IRAM to also keep the Toit interpreter in IRAM (faster
+interpreter). It refuses to boot on older chips.
+
 ## esp32-no-ble
 
 A [variant](esp32-no-ble/) for ESP32 boards.  This variant
