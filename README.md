@@ -26,3 +26,8 @@ directory for more variants.
 See the [partitions/esp32/README.md](partitions/esp32/README.md) for
 a list of the most commonly used partition tables. You can also browse
 the `partitions/esp32` directory for more partition tables.
+
+Since SDK v2.0.0-alpha.195 the flash size is derived from the partition
+table during flashing, so any envelope can be combined with any partition
+table. There is no longer a need for envelopes built for a specific flash
+size, such as the dedicated 16MB envelopes.

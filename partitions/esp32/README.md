@@ -5,6 +5,13 @@ This directory contains partition tables for ESP32 devices and their variants.
 During flashing, users can override the default partition table that comes
 with the envelope that they are flashing.
 
+> **Since SDK v2.0.0-alpha.195** the flashing tools derive the flash size from
+> the partition table itself, so any envelope can be combined with any of these
+> tables. You no longer need an envelope that was built for a specific flash
+> size; in particular, the dedicated 16MB envelopes are no longer necessary. For
+> example, a standard (4MB) envelope can be flashed together with a 16MB
+> partition table, and the device will use the full flash.
+
 Here is a list of the most commonly used partition tables:
 
 ## OTA-1C0000
