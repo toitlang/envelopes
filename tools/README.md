@@ -97,6 +97,12 @@ Upstream changes to unrelated settings are preserved. It then runs
 settings still take effect, and verifies that the generated defaults reproduce
 the effective configuration.
 
+The replacement patch contains only the migrated original variant edits.
+ESP-IDF's normalized defaults are used for validation, not as the patch target:
+omitting a redundant SDK assignment during normalization must not add an unrelated
+deletion to the variant patch. SDK comments and assignments outside the variant's
+changes are preserved.
+
 All configurations are generated before any patches are replaced. On success,
 the updater also advances `variants/sdkconfig.base` to the current Toit commit;
 commit that file together with the updated patches. Repeating the command on

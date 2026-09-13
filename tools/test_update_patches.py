@@ -50,6 +50,14 @@ class MigrationTest(unittest.TestCase):
         with self.assertRaisesRegex(updater.UpdateError, "Duplicate"):
             updater.settings("CONFIG_A=y\n# CONFIG_A is not set\n")
 
+    def test_preserves_sdk_comments_and_redundant_assignments(self):
+        old = "# SDK defaults\nCONFIG_A=y\n# CONFIG_B is not set\n"
+        variant = "# SDK defaults\nCONFIG_FEATURE=y\nCONFIG_A=y\n# CONFIG_B is not set\n"
+        current = old + "CONFIG_SPI_MASTER_ISR_IN_IRAM=y\n"
+        merged, changes = updater.migrate(old, variant, current)
+        self.assertEqual(merged, variant + "CONFIG_SPI_MASTER_ISR_IN_IRAM=y\n")
+        self.assertEqual(changes, {"CONFIG_FEATURE": "y"})
+
 
 class UpdateTest(unittest.TestCase):
     """Exercise real Git history and patch application, substituting IDF builds."""
@@ -130,6 +138,17 @@ class UpdateTest(unittest.TestCase):
             with self.assertRaisesRegex(updater.UpdateError, "esp32-b: IDF failed"):
                 self.update()
         self.assertEqual(before, self.snapshot())
+
+    def test_normalization_does_not_become_a_variant_edit(self):
+        def normalize(project, *args):
+            # Model save-defconfig omitting an SDK assignment equal to its
+            # Kconfig default. That omission is not part of the variant intent.
+            (project / "sdkconfig.defaults").write_text("CONFIG_VARIANT=2\n")
+        with patch.object(updater, "normalize", side_effect=normalize):
+            self.update()
+        for p in self.variants.glob("*/sdkconfig.defaults.patch"):
+            self.assertNotIn("-CONFIG_UPSTREAM", p.read_text())
+            self.assertIn(" CONFIG_UPSTREAM=3", p.read_text())
 
     def test_upstream_absorbed_variant_can_be_updated_again(self):
         self.basefile.write_text("CONFIG_UPSTREAM=3\nCONFIG_VARIANT=2\n")

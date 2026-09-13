@@ -75,7 +75,33 @@ def migrate(old_base, old_variant, new_base):
     for key, value in variant.items():
         if key in changes and key not in merged:
             merged[key] = value
-    return "".join(f"{key}={value}\n" for key, value in merged.items()), changes
+    return render_settings(new_base, merged, variant), changes
+
+
+def render_settings(base, desired, order):
+    """Preserve SDK lines and place added options near their variant neighbors."""
+    current = settings(base)
+    before = {}
+    following = None
+    for key in reversed(order):
+        if key in current and key in desired:
+            following = key
+        elif key in desired and key not in current:
+            before.setdefault(following, []).insert(0, f"{key}={desired[key]}\n")
+    lines = []
+    for line in base.splitlines(True):
+        key = next(iter(settings(line)), None)
+        if key is None:
+            lines.append(line)
+        else:
+            lines.extend(before.pop(key, []))
+            if key in desired:
+                lines.append(line if desired[key] == current[key] else f"{key}={desired[key]}\n")
+    if before.get(None):
+        if lines and not lines[-1].endswith("\n"):
+            lines[-1] += "\n"
+        lines.extend(before.pop(None))
+    return "".join(lines)
 
 
 def normalize(project, build, idf, chip, changes):
@@ -165,7 +191,7 @@ def update(args, work):
             run(["patch", "--batch", "--forward", "--fuzz=0", str(defaults), str(patch)])
             merged, changes = migrate(old, defaults.read_text(), current)
             defaults.write_text(merged)
-            configs[name] = (chip, current, changes)
+            configs[name] = (chip, current, changes, merged)
         except UpdateError as error:
             raise UpdateError(f"{name}: {error}") from error
 
@@ -175,7 +201,7 @@ def update(args, work):
          f"--variants-root={staged_variants}", *configs], log=work / "synthesize.log")
 
     replacements = {}
-    for name, (chip, current, changes) in configs.items():
+    for name, (chip, current, changes, merged) in configs.items():
         print(f"Regenerating {name}", flush=True)
         project = projects / name
         try:
@@ -183,8 +209,11 @@ def update(args, work):
         except UpdateError as error:
             raise UpdateError(f"{name}: {error}") from error
         patch = variants / name / "sdkconfig.defaults.patch"
+        # save-defconfig omits redundant SDK assignments. That is useful for
+        # validation, but must not introduce unrelated deletions into a variant
+        # patch. Only the migrated original variant edits belong in the patch.
         replacements[patch] = "".join(difflib.unified_diff(
-            current.splitlines(True), (project / "sdkconfig.defaults").read_text().splitlines(True),
+            current.splitlines(True), merged.splitlines(True),
             fromfile=f"toit/toolchains/{chip}/sdkconfig.defaults",
             tofile=f"synthesized/{name}/sdkconfig.defaults")).encode()
     replacements[baseline] = (target + "\n").encode()
