@@ -1,6 +1,6 @@
 --- toit/toolchains/esp32s3/sdkconfig.defaults
 +++ synthesized/esp32s3-audio/sdkconfig.defaults
-@@ -69,4 +69,7 @@
+@@ -71,4 +71,7 @@
  CONFIG_SPI_FLASH_LOG_FAILED_WRITE=y
  CONFIG_SPI_FLASH_WARN_SETTING_ZERO_TO_ONE=y
  CONFIG_WS_TRANSPORT=n
