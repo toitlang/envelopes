@@ -89,6 +89,13 @@ This requires the host SDK, the envelope tool's packages, and the ESP-IDF tools
 for the affected chips to be installed. The command activates the ESP-IDF
 environment from the Toit checkout automatically.
 
+The updater and its tests are written in Toit and use the envelope tool's existing
+packages. Run the tests with:
+
+```
+toit run tools/update-patches-test.toit
+```
+
 `variants/sdkconfig.base` records the Toit commit that the patches apply to.
 The updater reads that commit's defaults with Git, reconstructs each variant,
 and transfers its configuration differences onto the current checkout's defaults.

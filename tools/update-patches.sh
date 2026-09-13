@@ -5,6 +5,9 @@
 
 set -eo pipefail
 
+TOIT_EXEC=$1
+shift
+
 # Activate the tools and Python environment belonging to this Toit checkout.
 TOIT_ROOT=toit
 for arg in "$@"; do
@@ -13,4 +16,4 @@ for arg in "$@"; do
   esac
 done
 source "$TOIT_ROOT/third_party/esp-idf/export.sh"
-exec python "$(dirname "$0")/update-patches.py" "$@"
+exec "$TOIT_EXEC" run "$(dirname "$0")/main.toit" -- update-patches "$@"

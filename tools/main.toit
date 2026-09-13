@@ -9,6 +9,7 @@ import host.directory
 import host.pipe
 import .gist as gist
 import .utils
+import .update-patches as patches
 
 GIT-URL ::= "https://github.com/toitlang/toit.git"
 TOIT-IDF-COMPONENT-PATH ::= "toolchains/idf/components"
@@ -82,6 +83,17 @@ main args:
       ]
   root-cmd.add variant-synthesize-cmd
 
+  root-cmd.add (cli.Command "update-patches"
+      --help="Migrate sdkconfig patches onto the current Toit checkout."
+      --options=[
+        cli.Option "toit-root" --default="toit" --help="The root of the Toit checkout.",
+        cli.Option "build-root" --default="build" --help="Directory for temporary projects.",
+        cli.Option "sdk-path" --default="build/host/sdk" --help="The host SDK directory.",
+        cli.Option "variants-root" --default="variants" --help="The variants directory.",
+        cli.Option "base" --default="" --help="Override the revision in variants/sdkconfig.base.",
+      ]
+      --run=:: update-patches it --ui=ui)
+
   download-gist-cmd := cli.Command "download-gist"
       --help="Download all files of the given gist URL."
       --options=[
@@ -99,6 +111,31 @@ main args:
   root-cmd.add download-gist-cmd
 
   root-cmd.run args --ui=ui
+
+update-patches parsed/cli.Parsed --ui/cli.Ui:
+  build-root := fs.to-absolute parsed["build-root"]
+  directory.mkdir --recursive build-root
+  work := directory.mkdtemp "$build-root/update-patches-"
+  updater := patches.Updater
+      --toit-root=(fs.to-absolute parsed["toit-root"])
+      --variants-root=(fs.to-absolute parsed["variants-root"])
+      --sdk-path=(fs.to-absolute parsed["sdk-path"])
+      --base=parsed["base"]
+  synthesis-ui := PatchUi_ ui
+  exception := catch:
+    updater.update work: | variants-root output-root build-root variants |
+      variants.do: | variant/string |
+        variant-synthesize
+            --variant-path="$variants-root/$variant"
+            --toit-root=updater.toit-root
+            --output="$output-root/$variant"
+            --build-path="$build-root/$variant"
+            --sdk-path=updater.sdk-path
+            --ui=synthesis-ui
+  if exception:
+    ui.print "Patch update failed: $exception\nWorking files and logs: $work"
+    ui.abort
+  directory.rmdir --recursive work
 
 variant-list parsed/cli.Parsed --ui/cli.Ui:
   root := parsed["root"]
@@ -328,3 +365,12 @@ global-print_ str/string -> none:
 class Ui_ implements cli.Ui:
   print str/string: global-print_ str
   abort: exit 1
+
+// Lets the updater report the work directory when synthesis fails.
+class PatchUi_ implements cli.Ui:
+  delegate/cli.Ui
+
+  constructor .delegate:
+
+  print str/string: delegate.print str
+  abort: throw "Variant synthesis failed"

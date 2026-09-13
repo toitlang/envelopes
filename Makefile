@@ -70,12 +70,11 @@ synthesize-all: | create-build-directory create-synthesized-directory
 
 .PHONY: update-patches
 update-patches:
-	bash tools/update-patches.sh \
+	bash tools/update-patches.sh "$(TOIT_EXEC)" \
 			--toit-root="$(TOIT_DIRECTORY)" \
 			--build-root="$(BUILD_DIRECTORY)" \
 			--sdk-path="$(TOIT_SDK_DIRECTORY)" \
 			--variants-root="$(VARIANTS_DIRECTORY)" \
-			--toit-exec="$(TOIT_EXEC)" \
 			--base="$(PATCH_BASE)"
 
 .PHONY: create-build-directory
