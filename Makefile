@@ -12,8 +12,8 @@ else
 	EXE_SUFFIX :=
 endif
 
-# Set to '--update-patches' to update all patches.
-UPDATE_PATCHES :=
+# Override the recorded Toit revision when migrating patches from another base.
+PATCH_BASE :=
 
 TOIT_EXEC := toit$(EXE_SUFFIX)
 
@@ -66,12 +66,17 @@ synthesize-all: | create-build-directory create-synthesized-directory
 			--output-root="$(SYNTHESIZED_DIRECTORY)" \
 			--sdk-path="$(TOIT_SDK_DIRECTORY)" \
 			--variants-root="$(VARIANTS_DIRECTORY)" \
-			$(UPDATE_PATCHES) \
 			$(shell $(TOOL_RUN) list variants)
 
 .PHONY: update-patches
 update-patches:
-	$(MAKE) UPDATE_PATCHES=--update-patches synthesize-all
+	bash tools/update-patches.sh \
+			--toit-root="$(TOIT_DIRECTORY)" \
+			--build-root="$(BUILD_DIRECTORY)" \
+			--sdk-path="$(TOIT_SDK_DIRECTORY)" \
+			--variants-root="$(VARIANTS_DIRECTORY)" \
+			--toit-exec="$(TOIT_EXEC)" \
+			--base="$(PATCH_BASE)"
 
 .PHONY: create-build-directory
 create-build-directory:

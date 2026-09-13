@@ -7,7 +7,6 @@ import fs
 import host.file
 import host.directory
 import host.pipe
-import writer show Writer
 import .gist as gist
 import .utils
 
@@ -64,11 +63,7 @@ main args:
             --required,
         cli.Flag "ignore-errors"
             --help="Ignore errors when synthesizing variants."
-            --default=false,
-        cli.Flag "update-patches"
-            --help="Update the patches in the variants."
             --default=false
-            --hidden,
       ]
       --rest=[
           cli.Option "variant"
@@ -137,7 +132,6 @@ variant-synthesize parsed/cli.Parsed --ui/cli.Ui:
   variants-root := parsed["variants-root"]
   variants := parsed["variant"]
   ignore-errors := parsed["ignore-errors"]
-  update-patches := parsed["update-patches"]
 
   variants.do: | variant/string |
     exception := catch:
@@ -147,7 +141,6 @@ variant-synthesize parsed/cli.Parsed --ui/cli.Ui:
           --output="$output-root/$variant"
           --build-path="$build-root/$variant"
           --sdk-path=sdk-path
-          --update-patches=update-patches
           --ui=ui
     if exception:
       ui.print "Failed to synthesize variant '$variant': $exception."
@@ -163,7 +156,6 @@ variant-synthesize
     --output/string
     --build-path/string
     --sdk-path/string
-    --update-patches/bool
     --ui/cli.Ui:
   if file.is-file output:
     ui.print "Output is a file."
@@ -191,34 +183,6 @@ variant-synthesize
       --chip=chip
       --ui=ui
 
-  if update-patches:
-    if file.is-file "$variant-path/partitions.csv.patch":
-      original := "$toit-root/$(toit-partition-path-for_ --chip=chip)"
-      patched := "$output/partitions.csv"
-      update-patch_
-          --from=original
-          --to=patched
-          --output="$variant-path/partitions.csv.patch"
-          --ui=ui
-
-    if file.is-file "$variant-path/sdkconfig.defaults.patch":
-      original := "$toit-root/$(toit-sdk-config-defaults-path-for_ --chip=chip)"
-      patched := "$output/sdkconfig.defaults"
-      update-patch_
-          --from=original
-          --to=patched
-          --output="$variant-path/sdkconfig.defaults.patch"
-          --ui=ui
-
-    if file.is-file "$variant-path/main.patch":
-      original := "$toit-root/$(toit-main-path-for_ --chip=chip)"
-      patched := "$output/main"
-      update-patch_
-          --from=original
-          --to=patched
-          --output="$variant-path/main.patch"
-          --ui=ui
-
 apply-directory-patch_ --patch-path/string --directory/string --strip/int=1:
   patch := file.read-content patch-path
   args := ["patch", "-d", directory]
@@ -228,31 +192,12 @@ apply-directory-patch_ --patch-path/string --directory/string --strip/int=1:
   stream.out.write patch
   stream.close
 
-// Same as $pipe.from but doesn't throw if the exit code is non-zero.
-pipe-from arguments/List:
-  pipe-ends := pipe.OpenPipe false --child-process-name=arguments[0]
-  stdout := pipe-ends.fd
-  pipes := pipe.fork true pipe.PIPE-INHERITED stdout pipe.PIPE-INHERITED arguments[0] arguments
-  return pipe-ends
-
 apply-file-patch_ --patch-path/string --file-path/string:
   patch := file.read-content patch-path
   args := ["patch", file-path]
   stream := pipe.to args
   stream.out.write patch
   stream.close
-
-update-patch_ --from/string --to/string --output/string --ui/cli.Ui:
-  ui.print "Updating $output."
-  file.delete output
-  // Use labels to avoid the timestamp.
-  args := ["diff", "-aur", "--label", from, "--label", to, from, to]
-  stream := pipe-from args
-  out-stream := file.Stream.for-write output
-  writer := out-stream.out
-  while chunk := stream.read:
-    writer.write chunk
-  out-stream.close
 
 ensure-main_ dir/string --toit-root/string --chip/string:
   if file.is-directory "$dir/main": return

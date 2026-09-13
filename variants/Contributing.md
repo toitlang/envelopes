@@ -24,6 +24,11 @@ the OTA partition size has been increased.
 For `sdkconfig` changes, a patch to the original `sdkconfig.defaults`
 file is typically preferred.
 
+Before creating a new sdkconfig patch, run `make update-patches` so the existing
+patches and `variants/sdkconfig.base` target the Toit checkout you will use.
+Commit any resulting patch updates and the baseline file together. See the
+[updating instructions](../tools/README.md#updating-the-sdkconfig-patches).
+
 For example, to create a variant `esp32s3-foo`.
 * Create the following environment variables: `BASE=esp32s3` and
   `VARIANT=esp32s3-foo`. (Adjust for your base and variant).
