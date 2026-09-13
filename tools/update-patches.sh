@@ -1,38 +1,19 @@
 #!/bin/bash
+# Copyright (C) 2026 Toit contributors.
+# Use of this source code is governed by a BSD0-style license that can be
+# found in the LICENSE_BSD0 file.
 
-# First argument is the before hash/tag; second the after.
-BEFORE=$1
-AFTER=$2
+set -eo pipefail
 
-# Save the current directory.
-CURRENT_DIR=$(pwd)
+TOIT_EXEC=$1
+shift
 
-cd toit
-git checkout $BEFORE
-git submodule update --init --recursive
-
-cd $CURRENT_DIR
-
-make synthesize-all
-
-cd toit
-git checkout $AFTER
-git submodule update --init --recursive
-source third_party/esp-idf/export.sh
-
-cd $CURRENT_DIR
-cd synthesized
-VARIANTS=$(ls -d esp32*)
-cd $CURRENT_DIR
-
-for d in $VARIANTS; do
-  if [[ -e variants/$d/sdkconfig.defaults.patch ]]; then
-    export IDF_TARGET=$(echo $d | cut -d'-' -f1)
-    idf.py -C synthesized/$d -B synthesized/$d/build save-defconfig
-    # The base is everything of $d until the first '-'.
-    diff -aur \
-        toit/toolchains/$IDF_TARGET/sdkconfig.defaults \
-        synthesized/$d/sdkconfig.defaults \
-        > variants/$d/sdkconfig.defaults.patch
-  fi;
+# Activate the tools and Python environment belonging to this Toit checkout.
+TOIT_ROOT=toit
+for arg in "$@"; do
+  case "$arg" in
+    --toit-root=*) TOIT_ROOT=${arg#*=} ;;
+  esac
 done
+source "$TOIT_ROOT/third_party/esp-idf/export.sh"
+exec "$TOIT_EXEC" run "$(dirname "$0")/main.toit" -- update-patches "$@"

@@ -75,3 +75,60 @@ remove synthesized directories first, if you want to regenerate them.
 ### Building a variant
 
 Call `make` in the synthesized directory to build the variant.
+
+### Updating the sdkconfig patches
+
+After checking out the desired Toit revision and updating its ESP-IDF submodule,
+run:
+
+```
+make update-patches
+```
+
+This requires the host SDK, the envelope tool's packages, and the ESP-IDF tools
+for the affected chips to be installed. The command activates the ESP-IDF
+environment from the Toit checkout automatically.
+
+The updater and its tests are written in Toit and use the envelope tool's existing
+packages. Run the tests with:
+
+```
+toit run tools/update-patches-test.toit
+```
+
+`variants/sdkconfig.base` records the Toit commit that the patches apply to.
+The updater reads that commit's defaults with Git, reconstructs each variant,
+and transfers its configuration differences onto the current checkout's defaults.
+Upstream changes to unrelated settings are preserved. It then runs
+`idf.py save-defconfig` for each patched variant, checks that explicit variant
+settings still take effect, and verifies that the generated defaults reproduce
+the effective configuration.
+
+The replacement patch contains only the migrated original variant edits.
+ESP-IDF's normalized defaults are used for validation, not as the patch target:
+omitting a redundant SDK assignment during normalization must not add an unrelated
+deletion to the variant patch. SDK comments and assignments outside the variant's
+changes are preserved.
+
+All configurations are generated before any patches are replaced. On success,
+the updater also advances `variants/sdkconfig.base` to the current Toit commit;
+commit that file together with the updated patches. Repeating the command on
+the same checkout is supported. It uses fresh temporary projects under `build/`
+and does not change the Toit checkout or existing `synthesized/` projects.
+
+If both upstream and a variant changed the same setting differently, the updater
+stops and reports the setting and its three values. Configuration failures,
+including explicit variant settings that no longer take effect, also stop the
+update. Working files and logs are retained in the directory printed on failure.
+Review and resolve these changes before rerunning the command.
+
+The recorded commit must be available in the local Toit Git history. For older
+patch sets without a baseline file, or to correct a recorded base, specify the
+Toit commit or tag against which **all** patches were generated:
+
+```
+make update-patches PATCH_BASE=<old-toit-commit-or-tag>
+```
+
+The old positional `tools/update-patches.sh BEFORE AFTER` interface is replaced
+by this command; the target is always the current Toit checkout.
