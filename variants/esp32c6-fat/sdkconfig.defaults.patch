@@ -1,6 +1,6 @@
 --- toit/toolchains/esp32c6/sdkconfig.defaults
 +++ synthesized/esp32c6-fat/sdkconfig.defaults
-@@ -67,5 +67,4 @@
+@@ -66,5 +66,4 @@
  CONFIG_SPI_FLASH_LOG_FAILED_WRITE=y
  CONFIG_SPI_FLASH_WARN_SETTING_ZERO_TO_ONE=y
  CONFIG_WS_TRANSPORT=n

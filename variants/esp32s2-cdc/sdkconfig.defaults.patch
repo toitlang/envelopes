@@ -1,6 +1,6 @@
 --- toit/toolchains/esp32s2/sdkconfig.defaults
 +++ synthesized/esp32s2-cdc/sdkconfig.defaults
-@@ -25,6 +25,7 @@
+@@ -24,6 +24,7 @@
  CONFIG_SPIRAM_USE_CAPS_ALLOC=y
  CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP=y
  CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
