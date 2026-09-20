@@ -17,6 +17,12 @@ This variant supports Ethernet, but without the clock output.
 
 An ESP32 variant for boards with SPIRAM. Otherwise the same as the ESP32 variant.
 
+## esp32-audio-spiram
+
+An [ESP32 variant](esp32-audio-spiram/) with SPIRAM support and the full set
+of audio primitives, including packed-PCM processing, additional audio DSP
+operations, and float32 complex FFT operations.
+
 ## esp32-spiram-rev3
 
 Like `esp32-spiram`, but only for ESP32 chips of revision v3.0 (ECO3) or
