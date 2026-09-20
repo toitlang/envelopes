@@ -1,6 +1,6 @@
 --- toit/toolchains/esp32/sdkconfig.defaults
 +++ synthesized/esp32-spiram-rev3/sdkconfig.defaults
-@@ -36,19 +36,20 @@
+@@ -35,19 +35,20 @@
  CONFIG_ETH_SPI_ETHERNET_DM9051=y
  CONFIG_ETH_SPI_ETHERNET_W5500=y
  CONFIG_ESP_HTTP_CLIENT_ENABLE_HTTPS=n
