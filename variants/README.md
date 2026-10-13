@@ -72,3 +72,7 @@ A [variant](esp32s3-spiram-octo/) for ESP32-S3 boards with external
 octal PSRAM.
 
 These boards are faster, but often more expensive.
+
+## esp32s31
+
+A generic [ESP32-S31 variant](esp32s31) for boards using the ESP32-S31 target.
