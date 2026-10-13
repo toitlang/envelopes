@@ -32,6 +32,11 @@ on:
         description: Toit SDK version to check out
         required: true
         type: string
+      toit-repository:
+        description: Toit source repository URL (use a fork for review builds)
+        required: false
+        type: string
+        default: https://github.com/toitlang/toit.git
       branch:
         description: Branch to check out (overrides toit-version)
         required: false
@@ -52,6 +57,7 @@ on:
         type: string
 
 env:
+  TOIT_GIT_URL: ${{ github.event.inputs.toit-repository || 'https://github.com/toitlang/toit.git' }}
   # Toit currently supports the following architectures.
   # See Toit's Makefile and search for 'TOITLANG_SYSROOTS'.
   CROSS_ARCHS: aarch64 arm-linux-gnueabi armv7 raspbian riscv64
@@ -149,6 +155,12 @@ jobs:
             --variants-root=$VARIANTS_ROOT \
             --build-root=build \
             $VARIANTS
+
+      - name: Install S31 build tools when selected
+        run: |
+          if grep -rq 'IDF_TARGET=esp32s31' synthesized --include=Makefile; then
+            toit/tools/setup-idf-s31.sh --install
+          fi
 
       - name: Ccache stats before variants build
         run: |
