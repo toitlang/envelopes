@@ -26,7 +26,7 @@ TOIT_SDK_DIRECTORY := $(BUILD_DIRECTORY)/host/sdk
 TOOL_ENTRY := tools/main.toit
 TOOL_RUN := "$(TOIT_EXEC)" "$(TOOL_ENTRY)"
 
-TOIT_GIT_URL := https://github.com/toitlang/toit.git
+TOIT_GIT_URL ?= https://github.com/toitlang/toit.git
 
 .PHONY: all
 all:
