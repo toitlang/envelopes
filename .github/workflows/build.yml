@@ -150,6 +150,12 @@ jobs:
             --build-root=build \
             $VARIANTS
 
+      - name: Install S31 build tools when selected
+        run: |
+          if grep -rq 'IDF_TARGET=esp32s31' synthesized --include=Makefile; then
+            toit/tools/setup-idf-s31.sh --install
+          fi
+
       - name: Ccache stats before variants build
         run: |
           ccache -s

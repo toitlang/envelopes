@@ -275,7 +275,8 @@ create-cmakelists_ dir/string --toit-root/string --sdk-path/string --chip/string
   cmake-toit-root := to-cmake-path --relative-to=dir toit_root
   cmake-sdk-path := to-cmake-path --relative-to=dir sdk_path
   idf_component_path := "$cmake-toit-root/$TOIT_IDF_COMPONENT_PATH"
-  idf_path := "$cmake-toit-root/third_party/esp-idf"
+  idf-name := chip == "esp32s31" ? "esp-idf-s31" : "esp-idf"
+  idf_path := "$cmake-toit-root/third_party/$idf-name"
 
   // This doesn't work if the paths '"' characters.
   // Should be pretty rare.
@@ -299,7 +300,8 @@ create-makefile_ dir/string --toit-root/string --build-path/string --chip/string
   if file.is-file "$dir/Makefile": return
 
   makefile-toit-root := to-makefile-path --relative-to=dir toit-root
-  idf-path := "$makefile-toit-root/third_party/esp-idf"
+  idf-name := chip == "esp32s31" ? "esp-idf-s31" : "esp-idf"
+  idf-path := "$makefile-toit-root/third_party/$idf-name"
   if not fs.is-absolute idf-path:
     // Use the Makefile-path to make the path absolute.
     idf-path = "\$(SOURCE_DIR)/$idf-path"
@@ -314,10 +316,14 @@ create-makefile_ dir/string --toit-root/string --build-path/string --chip/string
     SHELL := bash
     .SHELLFLAGS += -e
 
-    IDF_PATH := $idf-path
+    export IDF_PATH := $idf-path
     IDF_PY := \$(IDF_PATH)/tools/idf.py
     TOIT_ROOT := $makefile-toit-root
     BUILD_PATH := $makefile-build-path
+
+    ifeq ($chip,esp32s31)
+    export IDF_TOOLS_PATH := \$(or \$(TOIT_S31_IDF_TOOLS_PATH),\$(HOME)/.espressif-s31)
+    endif
 
     ifeq (\$(OS),Windows_NT)
     \tEXE_SUFFIX=.exe
@@ -330,13 +336,16 @@ create-makefile_ dir/string --toit-root/string --build-path/string --chip/string
 
     .PHONY: check-env
     check-env:
-    \t\$(MAKE) -C "\$(TOIT_ROOT)" check-env
-    \t\$(MAKE) -C "\$(TOIT_ROOT)" check-esp32-env
+    \t\$(MAKE) -C "\$(TOIT_ROOT)" check-env ESP32_CHIP=$chip IDF_PATH="\$(IDF_PATH)"
+    \t\$(MAKE) -C "\$(TOIT_ROOT)" check-esp32-env ESP32_CHIP=$chip IDF_PATH="\$(IDF_PATH)"
 
     .PHONY: esp32
     esp32:
-    \tif [ "\$(shell command -v xtensa-esp32-elf-g++)" = "" ]; then source '\$(IDF_PATH)/export.sh'; fi; \\
-    \t\$(MAKE) esp32-no-env
+    \tif [ -x "\$(TOIT_ROOT)/tools/with-idf.sh" ]; then \\
+    \t  "\$(TOIT_ROOT)/tools/with-idf.sh" "\$(IDF_PATH)" \$(MAKE) esp32-no-env; \\
+    \telse \\
+    \t  source "\$(IDF_PATH)/export.sh" && \$(MAKE) esp32-no-env; \\
+    \tfi
 
     .PHONY: esp32-no-env
     esp32-no-env: check-env
