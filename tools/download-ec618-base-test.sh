@@ -9,7 +9,7 @@ work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 export EC618_TEST_RELEASE="$work/release"
 export EC618_TEST_REQUESTS="$work/requests"
-mkdir -p "$work/toit/toolchains/ec618" "$work/bin" "$EC618_TEST_RELEASE"
+mkdir -p "$work/toit/toolchains/ec618" "$work/toit/tools" "$work/bin" "$EC618_TEST_RELEASE"
 echo 5 > "$work/toit/toolchains/ec618/base-version"
 tag=ec618-base-v5
 for suffix in .elf .bin .json -api.json; do
@@ -30,10 +30,26 @@ CURL
 chmod +x "$work/bin/curl"
 export PATH="$work/bin:$PATH"
 
+cat > "$work/bin/toit-sdk" <<'TOIT'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ "$1" == pkg && "$2" == install && "$3" == "--project-root="* ]]
+[[ "${EC618_TEST_INSTALL_FAIL:-0}" != 1 ]]
+project=${3#--project-root=}
+[[ "$project" == */toit/tools ]]
+mkdir -p "$project/.packages"
+touch "$project/.packages/installed"
+TOIT
+chmod +x "$work/bin/toit-sdk"
+
 cat > "$work/toit/Makefile" <<'MAKE'
-.PHONY: ec618 ec618-base
+.PHONY: host-tools ec618 ec618-base
+host-tools:
+	@mkdir -p "$(BUILD)/host/sdk/bin"
+	@cp "$(EC618_TEST_RELEASE)/../bin/toit-sdk" "$(BUILD)/host/sdk/bin/toit"
 ec618:
 	@test -n "$(EC618_BASE_DIR)"
+	@test -f "$(CURDIR)/tools/.packages/installed"
 	@cmp "$(EC618_BASE_DIR)/base.elf" "$(EC618_TEST_RELEASE)/ec618-base-v5.elf"
 	@cmp "$(EC618_BASE_DIR)/base.bin" "$(EC618_TEST_RELEASE)/ec618-base-v5.bin"
 	@touch "$(BUILD)/built"
@@ -63,6 +79,18 @@ echo "Passed: builds slots against the SDK-selected released base"
 build
 test "$(wc -l < "$EC618_TEST_REQUESTS")" -eq 5
 echo "Passed: reuses verified cached artifacts"
+
+rm -rf "$work/toit/tools/.packages"
+export EC618_TEST_INSTALL_FAIL=1
+reject_build
+test ! -e "$work/toit/tools/.packages/installed"
+unset EC618_TEST_INSTALL_FAIL
+echo "Passed: package installation failures stop the slot build"
+
+build
+test -f "$work/toit/tools/.packages/installed"
+test -f "$work/build/built"
+echo "Passed: installs SDK tool packages before building slots"
 
 cache="$work/build/ec618-bases/$tag"
 echo corrupted >> "$cache/$tag.bin"
