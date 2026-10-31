@@ -57,3 +57,6 @@ base compatibility and flashing instructions.
 
 The Build workflow's `build-ec618` input enables EC618 builds and produces
 `firmware-ec618.envelope.gz` alongside the other release envelopes.
+The chosen SDK revision must reference a published base release; a newer base
+cannot replace the required version. To test a newer SDK before its next release,
+set the workflow's branch override to `main` and disable release uploads.

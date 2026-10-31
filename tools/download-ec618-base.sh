@@ -28,9 +28,14 @@ if [[ ! -d "$base_dir" ]]; then
   staging=$(mktemp -d "$cache_root/.$tag.XXXXXX")
   trap 'rm -rf "$staging"' EXIT
   url="https://github.com/toitlang/toit/releases/download/$tag"
+  echo "SDK requires published EC618 base $tag" >&2
   for suffix in .elf .bin .json -api.json -SHA256SUMS; do
-    curl --fail --silent --show-error --location --retry 3 \
-      --output "$staging/$tag$suffix" "$url/$tag$suffix"
+    if ! curl --fail --silent --show-error --location --retry 3 \
+        --output "$staging/$tag$suffix" "$url/$tag$suffix"; then
+      echo "Failed to download required base artifact: $url/$tag$suffix" >&2
+      echo "Use an SDK revision whose required base release is published, or publish $tag." >&2
+      exit 1
+    fi
   done
   (cd "$staging" && "${checksum[@]}" --check "$tag-SHA256SUMS") >&2
 

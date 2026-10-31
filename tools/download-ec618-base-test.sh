@@ -78,6 +78,8 @@ ln -s "$tag.elf" "$cache/base.elf"
 echo 6 > "$work/toit/toolchains/ec618/base-version"
 reject_build
 test ! -d "$work/build/ec618-bases/ec618-base-v6"
+grep -q 'SDK requires published EC618 base ec618-base-v6' "$work/rejected.log"
+grep -q 'Failed to download required base artifact: https://github.com/toitlang/toit/releases/download/ec618-base-v6/ec618-base-v6.elf' "$work/rejected.log"
 echo "Passed: an unavailable SDK-selected release cannot use an older base"
 
 echo 5 > "$work/toit/toolchains/ec618/base-version"
