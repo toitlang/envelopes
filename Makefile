@@ -94,3 +94,9 @@ build-all:
 .PHONY: build-host
 build-host:
 	$(MAKE) -C "$(TOIT_DIRECTORY)" BUILD=$(abspath $(BUILD_DIRECTORY)) sdk
+
+.PHONY: build-ec618
+build-ec618:
+	base_dir=$$(bash tools/download-ec618-base.sh "$(TOIT_DIRECTORY)" "$(BUILD_DIRECTORY)/ec618-bases"); \
+	$(MAKE) -C "$(TOIT_DIRECTORY)" BUILD=$(abspath $(BUILD_DIRECTORY)) \
+			EC618_BASE_DIR="$$base_dir" ec618

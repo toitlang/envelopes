@@ -13,6 +13,11 @@ on:
         required: false
         type: boolean
         default: true
+      build-ec618:
+        description: Build for EC618
+        required: false
+        type: boolean
+        default: true
       build-host:
         description: Build for host
         required: false
@@ -248,6 +253,75 @@ jobs:
           if [ "$build_failed" = true ]; then
             exit 1
           fi
+
+  build-ec618:
+    name: "Build EC618 - ${{ github.event.inputs.toit-version }}"
+    if: ${{ github.event.inputs.build-ec618 == 'true' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set the git version
+        run: |
+          echo "TOIT_GIT_VERSION=${{ github.event.inputs.toit-version }}" >> $GITHUB_ENV
+
+      - name: Fetch the Toit repository
+        run: |
+          REF=${{ github.event.inputs.branch }}
+          if [[ -z "$REF" ]]; then
+            REF=${{ github.event.inputs.toit-version }}
+          fi
+          make TOIT_VERSION=$REF download-toit
+
+      - name: Setup build dependencies
+        uses: ./toit/actions/setup-build
+        with:
+          toit-dir: toit
+          cache-key-prefix: "cache-ec618"
+
+      - name: Test EC618 base selection
+        run: bash tools/download-ec618-base-test.sh
+
+      - name: Install EC618 GNU toolchain
+        run: |
+          toolchain="$RUNNER_TEMP/gcc-arm-none-eabi-10.3-2021.10"
+          archive="$RUNNER_TEMP/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2"
+          curl --fail --location --retry 3 \
+            --output "$archive" \
+            https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+          echo "97dbb4f019ad1650b732faffcc881689cedc14e2b7ee863d390e0a41ef16c9a3  $archive" |
+            sha256sum --check -
+          tar --extract --bzip2 --file "$archive" --directory "$RUNNER_TEMP"
+          echo "EC618_GCC_PATH=$toolchain" >> "$GITHUB_ENV"
+          echo "$toolchain/bin" >> "$GITHUB_PATH"
+
+      - name: Build the EC618 envelope
+        run: make build-ec618
+
+      - name: Prepare envelope for upload
+        run: |
+          mkdir envelopes
+          cp build/ec618/firmware.envelope envelopes/firmware-ec618.envelope
+          gzip -9 envelopes/firmware-ec618.envelope
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: artifacts-ec618
+          path: envelopes
+
+      - name: Release
+        if: ${{ github.event.inputs.upload-release == 'true' }}
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: envelopes/*
+          body: |
+            Envelopes and partition tables for Toit SDK ${{ github.event.inputs.toit-version }}
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.event.inputs.toit-version }}
+          commit: main
 
   build-host:
     if: ${{ github.event.inputs.build-host == 'true' }}

@@ -76,6 +76,14 @@ remove synthesized directories first, if you want to regenerate them.
 
 Call `make` in the synthesized directory to build the variant.
 
+EC618 builds use `make build-ec618` from the repository root and the published
+base release selected by the SDK. See [the EC618 instructions](../README.md#ec618).
+The base download and build integration tests run without network access:
+
+```sh
+bash tools/download-ec618-base-test.sh
+```
+
 ### Updating the sdkconfig patches
 
 After checking out the desired Toit revision and updating its ESP-IDF submodule,
